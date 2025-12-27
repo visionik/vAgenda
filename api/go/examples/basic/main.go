@@ -13,7 +13,8 @@ import (
 )
 
 func main() {
-	fmt.Println("=== vAgenda Go Library Examples ===\n")
+	fmt.Println("=== vAgenda Go Library Examples ===")
+	fmt.Println()
 
 	// Example 1: Build a TodoList
 	fmt.Println("Example 1: Building a TodoList")
