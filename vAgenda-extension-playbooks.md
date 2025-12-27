@@ -56,9 +56,10 @@ A typical loop:
 4. **Reuse**
    - Retrieve a relevant subset of entries for the next run.
 
-vAgenda supports this by:
-- representing long-term knowledge as `playbook.entries` (stable IDs, atomic entries), and
-- supporting incremental updates via `PlaybookPatch` rather than whole-playbook rewrites.
+vAgenda supports this by representing long-term knowledge as `playbook.entries`: an **append-only log** of playbook entries.
+
+- Each playbook entry has an `operation` and either creates a new logical entry or updates/deprecates an existing one.
+- Updates form a **per-entry linked list** via `prevEventId` (not a single global chain).
 
 
 ## Dependencies
@@ -75,11 +76,9 @@ The playbooks extension schema is provided at `schemas/vagenda-extension-playboo
 
 ## Data model
 
-This extension adds four core concepts:
+This extension adds two core concepts:
 - `Playbook`: a container for entries and summary metrics.
-- `PlaybookEntry`: a single reusable entry (strategy/rule/warning/etc.).
-- `PlaybookPatch`: an incremental update envelope.
-- `PlaybookPatchOp`: a single operation inside a patch.
+- `PlaybookEntry`: an **append-only** entry in the playbook log (a create/update/deprecate event).
 
 ### New Types (reference)
 
@@ -88,32 +87,40 @@ Playbook {
   version: number           # Playbook version (monotonic; increments on update)
   created: datetime         # When playbook was created
   updated: datetime         # Last update time
-  entries: PlaybookEntry[]  # Itemized entries (playbook-aligned)
+  entries: PlaybookEntry[]  # Append-only log of playbook entries
   metrics?: PlaybookMetrics # Optional summary stats
 }
 
 PlaybookEntry {
-  id: string                # Unique identifier within the playbook (stable)
-  kind: enum                # "strategy" | "learning" | "rule" | "warning" | "note"
-  title?: string            # Optional short label
-  text: string              # The entry content (the load-bearing part)
-  tags?: string[]
-  evidence?: string[]       # Human-readable pointers (links, change ids, outcomes)
-  confidence?: number       # 0.0-1.0 (optional; omit when unknown)
+  eventId: string           # Unique ID for this event (append-only)
+  targetId: string          # Stable ID for the logical entry being evolved
+  operation: enum           # "initial" | "append" | "update" | "deprecate"
+  prevEventId?: string      # Previous eventId for the same targetId (per-entry linked list)
 
-  helpfulCount?: number     # Count of positive feedback / successful uses
-  harmfulCount?: number     # Count of negative feedback / failures
+  kind?: enum               # "strategy" | "learning" | "rule" | "warning" | "note" (required for initial/append)
+  title?: string            # Optional short label
+  text?: string             # Entry content (required for initial/append; optional for update)
+  tags?: string[]
+  evidence?: string[]
+  confidence?: number       # 0.0-1.0
+
+  delta?: {                 # Merge-safe counters: deltas are commutative and may be accumulated
+    helpfulCount?: integer
+    harmfulCount?: integer
+  }
+
   feedbackType?: enum       # "humanReview" | "executionOutcome" | "selfReport" | "unknown"
 
-  createdAt?: datetime
-  updatedAt?: datetime
+  createdAt: datetime       # When this event was created
 
-  status?: enum             # "active" | "deprecated" | "quarantined"
+  status?: enum             # "active" | "deprecated" | "quarantined" (may be set by update/deprecate)
   deprecatedReason?: string
-  supersedes?: string[]     # Entry IDs that this entry supersedes
-  supersededBy?: string     # Entry ID that supersedes this entry
-  duplicateOf?: string      # Entry ID that this entry duplicates (dedup without erasure)
 
+  supersedes?: string[]     # targetIds that this entry supersedes
+  supersededBy?: string     # targetId that supersedes this entry
+  duplicateOf?: string      # targetId that this entry duplicates
+
+  reason?: string           # Why this event was added
   metadata?: object         # Extension escape hatch
 }
 
@@ -121,25 +128,6 @@ PlaybookMetrics {
   totalEntries: number
   averageConfidence?: number
   lastUpdated?: datetime
-}
-
-PlaybookPatch {
-  playbookId?: string            # Optional identifier when patch is shipped separately
-  baseDocumentSequence?: number  # Optional guard for optimistic concurrency.
-                                # When Extension 10 is in use, this MUST refer to the target document's `sequence` value
-                                # (e.g., `plan.sequence` or `todoList.sequence`) at the time the patch was generated.
-  operations: PlaybookPatchOp[]
-}
-
-PlaybookPatchOp {
-  op: enum                  # "appendEntry" | "updateEntry" | "incrementCounter" | "deprecateEntry"
-  entryId?: string          # Target entry id (when applicable)
-  entry?: PlaybookEntry     # Full entry for append/update
-  delta?: {
-    helpfulCount?: number   # Usually +1
-    harmfulCount?: number   # Usually +1
-  }
-  reason?: string           # Why this op is being applied
 }
 ```
 
@@ -182,110 +170,99 @@ A `Playbook` is the long-lived container. It holds the entry list (`entries`) pl
 
 ### PlaybookEntry
 
-A `PlaybookEntry` is an **atomic** unit of reusable knowledge.
+A `PlaybookEntry` is an **append-only event** in the playbook log.
 
 Guidance:
-- Keep it to “one idea per entry”.
+- Keep it to “one idea per logical entry” (one `targetId`).
 - Prefer actionable language.
 - Add evidence whenever possible.
+- Track feedback via `delta` increments (merge-safe).
 
-#### Example: kind = strategy
+#### Example: create (operation = append, kind = strategy)
 
 ```json
 {
-  "id": "entry-test-first",
+  "eventId": "evt-0100",
+  "targetId": "entry-test-first",
+  "operation": "append",
   "kind": "strategy",
   "title": "Write a failing test first",
   "text": "Before changing code, write a failing test that reproduces the bug; then implement the minimal fix.",
   "tags": ["testing", "debugging"],
   "confidence": 0.95,
-  "helpfulCount": 14,
-  "harmfulCount": 0,
   "feedbackType": "executionOutcome",
   "status": "active",
-  "evidence": ["pr:42", "ci:green-run-2025-12-26"]
+  "evidence": ["pr:42", "ci:green-run-2025-12-26"],
+  "createdAt": "2025-12-27T09:00:00Z"
 }
 ```
 
-#### Example: kind = rule
+#### Example: feedback (delta increment)
 
 ```json
 {
-  "id": "entry-task-first",
-  "kind": "rule",
-  "text": "For repeatable workflows, add a Task target instead of documenting raw shell commands.",
-  "tags": ["workflow", "taskfile"],
-  "confidence": 0.9,
-  "helpfulCount": 7,
-  "harmfulCount": 0,
-  "status": "active"
+  "eventId": "evt-0101",
+  "targetId": "entry-test-first",
+  "operation": "update",
+  "prevEventId": "evt-0100",
+  "delta": {"helpfulCount": 1},
+  "createdAt": "2025-12-27T09:10:00Z",
+  "reason": "Bug fix went smoothly with test-first"
 }
 ```
 
-#### Example: kind = warning
+#### Example: refine (operation = update)
 
 ```json
 {
-  "id": "entry-avoid-blanket-refactors",
-  "kind": "warning",
-  "text": "Avoid large refactors without a characterization test suite; changes are hard to review and regressions are likely.",
-  "tags": ["refactor", "risk"],
-  "confidence": 0.85,
-  "helpfulCount": 5,
-  "harmfulCount": 1,
-  "status": "active",
-  "evidence": ["incident:2025-09-14-regression"]
+  "eventId": "evt-0102",
+  "targetId": "entry-test-first",
+  "operation": "update",
+  "prevEventId": "evt-0101",
+  "text": "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green.",
+  "createdAt": "2025-12-27T09:20:00Z",
+  "reason": "Refined wording after repeated use"
 }
 ```
 
-#### Example: kind = learning
+#### Example: supersede (link logical entries)
 
 ```json
 {
-  "id": "entry-timezone-bugs",
-  "kind": "learning",
-  "text": "Timezone-related bugs usually come from mixing naive timestamps and offset timestamps; require RFC3339 with offsets everywhere.",
-  "tags": ["time", "data-integrity"],
-  "confidence": 0.8,
-  "helpfulCount": 3,
-  "harmfulCount": 0,
-  "status": "active"
-}
-```
-
-#### Example: kind = note
-
-```json
-{
-  "id": "entry-context",
-  "kind": "note",
-  "text": "In this repo, the authoritative spec is README.md; extension docs live in vAgenda-extension-*.md.",
-  "tags": ["docs"],
-  "status": "active"
-}
-```
-
-#### Example: refinement and dedup
-
-```json
-{
-  "id": "entry-tests-before-fix-v2",
+  "eventId": "evt-0200",
+  "targetId": "entry-tests-before-fix-v2",
+  "operation": "append",
   "kind": "strategy",
   "text": "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green.",
   "supersedes": ["entry-test-first"],
-  "confidence": 0.96,
-  "status": "active"
+  "createdAt": "2025-12-27T09:30:00Z"
 }
 ```
 
 ```json
 {
-  "id": "entry-test-first-duplicate",
+  "eventId": "evt-0201",
+  "targetId": "entry-test-first",
+  "operation": "update",
+  "prevEventId": "evt-0102",
+  "supersededBy": "entry-tests-before-fix-v2",
+  "createdAt": "2025-12-27T09:30:00Z"
+}
+```
+
+#### Example: dedup (soft)
+
+```json
+{
+  "eventId": "evt-0300",
+  "targetId": "entry-test-first-duplicate",
+  "operation": "append",
   "kind": "strategy",
   "text": "Always start with a failing test.",
   "duplicateOf": "entry-test-first",
   "status": "deprecated",
-  "deprecatedReason": "Duplicate entry; keep canonical entry-test-first"
+  "deprecatedReason": "Duplicate entry; keep canonical entry-test-first",
+  "createdAt": "2025-12-27T09:40:00Z"
 }
 ```
 
@@ -301,96 +278,98 @@ Guidance:
 }
 ```
 
-### PlaybookPatch
+### PlaybookEntry operations (event log)
 
-`PlaybookPatch` is an envelope for incremental updates.
+Playbook updates are represented by appending new `PlaybookEntry` objects to `playbook.entries`.
 
-- If Extension 10 is in use, `baseDocumentSequence` SHOULD be set to the current document `sequence`.
+#### initial / append
+
+Create a new logical entry (a new `targetId`). `operation: "initial"` and `operation: "append"` are equivalent; implementations MAY use either.
 
 ```json
 {
-  "baseDocumentSequence": 12,
-  "operations": []
+  "eventId": "evt-0001",
+  "targetId": "entry-task-first",
+  "operation": "append",
+  "kind": "rule",
+  "text": "For repeatable workflows, add a Task target instead of documenting raw shell commands.",
+  "status": "active",
+  "feedbackType": "humanReview",
+  "createdAt": "2025-12-27T09:00:00Z",
+  "reason": "Standardize workflow in this repo"
 }
 ```
 
-### PlaybookPatchOp
+#### update
 
-`PlaybookPatchOp` is a single update operation.
-
-#### appendEntry
+Update an existing logical entry by pointing at the previous event for that `targetId`.
 
 ```json
 {
-  "op": "appendEntry",
-  "entry": {
-    "id": "entry-new",
-    "kind": "learning",
-    "text": "CI flakes were caused by test ordering; randomize tests locally to reproduce.",
-    "status": "active",
-    "feedbackType": "executionOutcome",
-    "helpfulCount": 1,
-    "harmfulCount": 0
-  },
-  "reason": "Repeated flakes found in nightly runs"
+  "eventId": "evt-0002",
+  "targetId": "entry-task-first",
+  "operation": "update",
+  "prevEventId": "evt-0001",
+  "text": "For repeatable workflows, add a Task target instead of documenting raw shell commands; keep tasks small and declarative.",
+  "createdAt": "2025-12-27T09:10:00Z",
+  "reason": "Clarify the preferred task style"
 }
 ```
 
-#### updateEntry
+#### delta increments (counters)
+
+Counters are updated via **deltas** (merge-safe).
 
 ```json
 {
-  "op": "updateEntry",
-  "entryId": "entry-avoid-blanket-refactors",
-  "entry": {
-    "id": "entry-avoid-blanket-refactors",
-    "kind": "warning",
-    "text": "Avoid large refactors without a characterization test suite and a rollback plan.",
-    "status": "active"
-  },
-  "reason": "Clarify mitigation steps"
-}
-```
-
-#### incrementCounter
-
-```json
-{
-  "op": "incrementCounter",
-  "entryId": "entry-task-first",
+  "eventId": "evt-0003",
+  "targetId": "entry-task-first",
+  "operation": "update",
+  "prevEventId": "evt-0002",
   "delta": {"helpfulCount": 1},
+  "createdAt": "2025-12-27T09:20:00Z",
   "reason": "Task target reduced setup time"
 }
 ```
 
-#### deprecateEntry
+#### deprecate
+
+Soft-deprecate an entry (retain history).
 
 ```json
 {
-  "op": "deprecateEntry",
-  "entryId": "entry-test-first-duplicate",
+  "eventId": "evt-0004",
+  "targetId": "entry-test-first-duplicate",
+  "operation": "deprecate",
+  "prevEventId": "evt-0009",
+  "status": "deprecated",
+  "deprecatedReason": "Duplicate entry; keep canonical entry-test-first",
+  "createdAt": "2025-12-27T09:30:00Z",
   "reason": "Canonicalized into entry-test-first"
 }
 ```
 
 ## Playbook invariants (normative)
 
-- Tools SHOULD update playbooks via **localized operations** (PlaybookPatch) rather than rewriting `entries` wholesale.
-- `PlaybookEntry.id` MUST be stable once created.
-- `appendEntry` operations MUST NOT modify existing entries.
-- `incrementCounter` operations MUST be commutative (safe to merge) and SHOULD be used for feedback tracking.
+- Tools MUST update playbooks by **appending** new `PlaybookEntry` events to `playbook.entries`.
+- `PlaybookEntry.targetId` MUST be stable once created.
+- For a given `targetId`, updates MUST form a per-entry linked list via `prevEventId`.
+  - `operation: "append"|"initial"` events MUST NOT set `prevEventId`.
+  - `operation: "update"|"deprecate"` events MUST set `prevEventId`.
+- Counter updates SHOULD be represented as `delta` increments (commutative / merge-safe).
 - Deprecation MUST be soft (retain the entry, mark it non-active).
-- If `PlaybookPatch.baseDocumentSequence` is present and Extension 10 is in use, an implementation MUST compare it against the current document `sequence`.
-  - If they differ, the patch MUST be treated as concurrent and applied via merge/conflict rules (or rejected with a conflict error).
 
 ## Merge semantics (deterministic, non-LLM)
 
-When merging concurrent updates:
+Playbooks are append-only: merging is performed by **set/concat union** of `playbook.entries`.
 
-- `appendEntry` commutes (merge-safe).
-- `incrementCounter` commutes (merge-safe; counters add).
-- Two concurrent `updateEntry` ops on the same `entryId` are a conflict unless they touch disjoint fields.
-- `deprecateEntry` wins over `active` unless explicitly reactivated by a later change.
+To compute a “current view” for a given `targetId`, consumers traverse the per-entry linked list (following `prevEventId`) to find the head event and apply its field updates and accumulated `delta` counters.
+
+Concurrent updates may produce multiple heads for the same `targetId`. Implementations MUST either:
+- treat this as a conflict, or
+- deterministically select a winner using a stable ordering (e.g., higher `createdAt` wins; break ties by lexicographic `eventId`).
+
+Deprecation events SHOULD win over an `active` status unless explicitly reactivated by a later event.
 
 ## Grow-and-refine lifecycle
 
@@ -400,7 +379,7 @@ When merging concurrent updates:
 
 ## Best practices
 
-- Prefer **PlaybookPatch** updates over rewriting `playbook.entries` wholesale.
+- Prefer **append-only** updates (add a new `PlaybookEntry` event) over rewriting `playbook.entries` wholesale.
 - Keep entries **atomic** (one idea per entry) to make merge/dedup easier.
 - Add **evidence** as soon as you have it (links to PRs, traces, changeLog entries, benchmark results).
 - When revising an entry substantially, create a successor entry and connect them via `supersedes/supersededBy` rather than silently editing history.
@@ -421,19 +400,21 @@ class Narrative: title, content
 class Playbook: version, created, updated, entries, metrics
 class PlaybookMetrics: totalEntries, averageConfidence, lastUpdated
 class PlaybookEntry:
-  id, kind, title, text, tags, evidence, confidence,
-  helpfulCount, harmfulCount, feedbackType,
-  status, deprecatedReason, supersedes, supersededBy, duplicateOf
+  eventId, targetId, operation, prevEventId,
+  kind, title, text, tags, evidence, confidence,
+  delta, feedbackType, createdAt,
+  status, deprecatedReason, supersedes, supersededBy, duplicateOf,
+  reason
 
 vAgendaInfo: vAgendaInfo("0.2")
 plan: Plan(
-  "plan-ace-realworld-001",
+  "plan-playbooks-realworld-001",
   "Agent workflow rules",
   "inProgress",
   {
     "proposal": Narrative(
       "Overview",
-      "Curate reusable agent workflow strategies and warnings; update via PlaybookPatch."
+      "Curate reusable agent workflow strategies and warnings; evolve via append-only playbook entries."
     )
   },
   Playbook(
@@ -442,92 +423,49 @@ plan: Plan(
     "2025-12-27T08:00:00Z",
     [
       PlaybookEntry(
+        "evt-0001",
         "entry-task-first",
+        "append",
+        null,
         "rule",
         "Task-first workflow",
         "For repeatable workflows, add a Task target instead of documenting raw shell commands.",
         ["workflow", "taskfile"],
         ["docs:warp.md"],
         0.9,
-        7,
-        0,
+        null,
         "humanReview",
+        "2025-12-27T09:00:00Z",
         "active",
         null,
         null,
         null,
-        null
+        null,
+        "Standardize workflow in this repo"
       ),
       PlaybookEntry(
-        "entry-test-first",
-        "strategy",
-        "Failing test first",
-        "Before changing code, write a failing test that reproduces the bug; then implement the minimal fix.",
-        ["testing", "debugging"],
-        ["pr:42", "ci:green-run-2025-12-26"],
-        0.95,
-        14,
-        0,
+        "evt-0002",
+        "entry-task-first",
+        "update",
+        "evt-0001",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        {"helpfulCount": 1},
         "executionOutcome",
-        "active",
-        null,
-        null,
-        "entry-tests-before-fix-v2",
-        null
-      ),
-      PlaybookEntry(
-        "entry-tests-before-fix-v2",
-        "strategy",
-        "Refined test-first",
-        "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green.",
-        ["testing"],
-        ["pr:57"],
-        0.96,
-        3,
-        0,
-        "executionOutcome",
-        "active",
-        null,
-        ["entry-test-first"],
-        null,
-        null
-      ),
-      PlaybookEntry(
-        "entry-avoid-blanket-refactors",
-        "warning",
-        null,
-        "Avoid large refactors without a characterization test suite and a rollback plan.",
-        ["refactor", "risk"],
-        ["incident:2025-09-14-regression"],
-        0.85,
-        5,
-        1,
-        "executionOutcome",
-        "active",
+        "2025-12-27T09:20:00Z",
         null,
         null,
         null,
-        null
-      ),
-      PlaybookEntry(
-        "entry-timezone-bugs",
-        "learning",
-        null,
-        "Timezone-related bugs usually come from mixing naive timestamps and offset timestamps; require RFC3339 with offsets everywhere.",
-        ["time", "data-integrity"],
-        ["issue:113"],
-        0.8,
-        3,
-        0,
-        "executionOutcome",
-        "active",
         null,
         null,
-        null,
-        null
+        "Task target reduced setup time"
       )
     ],
-    PlaybookMetrics(5, 0.89, "2025-12-27T08:00:00Z")
+    PlaybookMetrics(1, 0.9, "2025-12-27T09:20:00Z")
   )
 )
 ```
@@ -540,90 +478,50 @@ plan: Plan(
     "version": "0.2"
   },
   "plan": {
-    "id": "plan-ace-realworld-001",
+    "id": "plan-playbooks-realworld-001",
     "title": "Agent workflow rules",
     "status": "inProgress",
     "narratives": {
       "proposal": {
         "title": "Overview",
-        "content": "Curate reusable agent workflow strategies and warnings; update via PlaybookPatch."
+        "content": "Curate reusable agent workflow strategies and warnings; evolve via append-only playbook entries."
       }
     },
     "playbook": {
       "version": 7,
       "created": "2025-01-10T18:00:00Z",
-      "updated": "2025-12-27T08:00:00Z",
+      "updated": "2025-12-27T09:20:00Z",
       "entries": [
         {
-          "id": "entry-task-first",
+          "eventId": "evt-0001",
+          "targetId": "entry-task-first",
+          "operation": "append",
           "kind": "rule",
           "title": "Task-first workflow",
           "text": "For repeatable workflows, add a Task target instead of documenting raw shell commands.",
           "tags": ["workflow", "taskfile"],
           "evidence": ["docs:warp.md"],
           "confidence": 0.9,
-          "helpfulCount": 7,
-          "harmfulCount": 0,
           "feedbackType": "humanReview",
-          "status": "active"
-        },
-        {
-          "id": "entry-test-first",
-          "kind": "strategy",
-          "title": "Failing test first",
-          "text": "Before changing code, write a failing test that reproduces the bug; then implement the minimal fix.",
-          "tags": ["testing", "debugging"],
-          "evidence": ["pr:42", "ci:green-run-2025-12-26"],
-          "confidence": 0.95,
-          "helpfulCount": 14,
-          "harmfulCount": 0,
-          "feedbackType": "executionOutcome",
           "status": "active",
-          "supersededBy": "entry-tests-before-fix-v2"
+          "createdAt": "2025-12-27T09:00:00Z",
+          "reason": "Standardize workflow in this repo"
         },
         {
-          "id": "entry-tests-before-fix-v2",
-          "kind": "strategy",
-          "title": "Refined test-first",
-          "text": "Write a failing test first; then implement the minimal change that makes it pass; finally refactor with tests green.",
-          "tags": ["testing"],
-          "evidence": ["pr:57"],
-          "confidence": 0.96,
-          "helpfulCount": 3,
-          "harmfulCount": 0,
+          "eventId": "evt-0002",
+          "targetId": "entry-task-first",
+          "operation": "update",
+          "prevEventId": "evt-0001",
+          "delta": {"helpfulCount": 1},
           "feedbackType": "executionOutcome",
-          "status": "active",
-          "supersedes": ["entry-test-first"]
-        },
-        {
-          "id": "entry-avoid-blanket-refactors",
-          "kind": "warning",
-          "text": "Avoid large refactors without a characterization test suite and a rollback plan.",
-          "tags": ["refactor", "risk"],
-          "evidence": ["incident:2025-09-14-regression"],
-          "confidence": 0.85,
-          "helpfulCount": 5,
-          "harmfulCount": 1,
-          "feedbackType": "executionOutcome",
-          "status": "active"
-        },
-        {
-          "id": "entry-timezone-bugs",
-          "kind": "learning",
-          "text": "Timezone-related bugs usually come from mixing naive timestamps and offset timestamps; require RFC3339 with offsets everywhere.",
-          "tags": ["time", "data-integrity"],
-          "evidence": ["issue:113"],
-          "confidence": 0.8,
-          "helpfulCount": 3,
-          "harmfulCount": 0,
-          "feedbackType": "executionOutcome",
-          "status": "active"
+          "createdAt": "2025-12-27T09:20:00Z",
+          "reason": "Task target reduced setup time"
         }
       ],
       "metrics": {
-        "totalEntries": 5,
-        "averageConfidence": 0.89,
-        "lastUpdated": "2025-12-27T08:00:00Z"
+        "totalEntries": 1,
+        "averageConfidence": 0.9,
+        "lastUpdated": "2025-12-27T09:20:00Z"
       }
     }
   }

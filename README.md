@@ -1398,7 +1398,7 @@ The Playbooks extension spec is in `vAgenda-extension-playbooks.md` (see that do
 - **Requires**: Extension 2 (Identifiers)
 - **Recommended**: Extension 10 (Version Control & Sync)
 
-Playbooks add long-term memory via `playbook.entries` and support incremental updates via `PlaybookPatch` (see the extension document for full details).
+Playbooks add long-term memory via `playbook.entries` as an append-only log of playbook entries (each entry has an `operation` and a per-entry linked-list reference for updates/deprecations).
 
 ---
 
@@ -1573,7 +1573,7 @@ Editors should:
 - Use three-way merge for conflict detection
 
 ### Playbooks
-See `vAgenda-extension-playbooks.md` for playbooks best practices (e.g. grow-and-refine, evidence linking, dedup, and PlaybookPatch update guidance).
+See `vAgenda-extension-playbooks.md` for playbooks best practices (e.g. grow-and-refine, evidence linking, dedup, and append-only `operation` entries).
 
 ---
 
