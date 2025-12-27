@@ -56,7 +56,7 @@ A typical ACE loop:
 
 vAgenda supports this by:
 - representing long-term knowledge as `playbook.entries` (stable IDs, atomic entries), and
-- supporting incremental updates via `AcePatch` rather than whole-playbook rewrites.
+- supporting incremental updates via `PlaybookPatch` rather than whole-playbook rewrites.
 
 This extension is inspired by the ACE paradigm described in "Agentic Context Engineering" (arXiv:2510.04618).
 
@@ -77,8 +77,8 @@ The ACE extension schema is provided at `schemas/vagenda-extension-ace.schema.js
 This extension adds four core concepts:
 - `Playbook`: a container for entries and summary metrics.
 - `PlaybookEntry`: a single reusable entry (strategy/rule/warning/etc.).
-- `AcePatch`: an incremental update envelope.
-- `AcePatchOp`: a single operation inside a patch.
+- `PlaybookPatch`: an incremental update envelope.
+- `PlaybookPatchOp`: a single operation inside a patch.
 
 ### New Types (reference)
 
@@ -122,15 +122,15 @@ PlaybookMetrics {
   lastUpdated?: datetime
 }
 
-AcePatch {
+PlaybookPatch {
   playbookId?: string            # Optional identifier when patch is shipped separately
   baseDocumentSequence?: number  # Optional guard for optimistic concurrency.
                                 # When Extension 10 is in use, this MUST refer to the target document's `sequence` value
                                 # (e.g., `plan.sequence` or `todoList.sequence`) at the time the patch was generated.
-  operations: AcePatchOp[]
+  operations: PlaybookPatchOp[]
 }
 
-AcePatchOp {
+PlaybookPatchOp {
   op: enum                  # "appendEntry" | "updateEntry" | "incrementCounter" | "deprecateEntry"
   entryId?: string          # Target entry id (when applicable)
   entry?: PlaybookEntry     # Full entry for append/update
@@ -300,9 +300,9 @@ Guidance:
 }
 ```
 
-### AcePatch
+### PlaybookPatch
 
-`AcePatch` is an envelope for incremental updates.
+`PlaybookPatch` is an envelope for incremental updates.
 
 - If Extension 10 is in use, `baseDocumentSequence` SHOULD be set to the current document `sequence`.
 
@@ -313,9 +313,9 @@ Guidance:
 }
 ```
 
-### AcePatchOp
+### PlaybookPatchOp
 
-`AcePatchOp` is a single update operation.
+`PlaybookPatchOp` is a single update operation.
 
 #### appendEntry
 
@@ -374,12 +374,12 @@ Guidance:
 
 ## ACE invariants (normative)
 
-- Tools SHOULD update playbooks via **localized operations** (AcePatch) rather than rewriting `entries` wholesale.
+- Tools SHOULD update playbooks via **localized operations** (PlaybookPatch) rather than rewriting `entries` wholesale.
 - `PlaybookEntry.id` MUST be stable once created.
 - `appendEntry` operations MUST NOT modify existing entries.
 - `incrementCounter` operations MUST be commutative (safe to merge) and SHOULD be used for feedback tracking.
 - Deprecation MUST be soft (retain the entry, mark it non-active).
-- If `AcePatch.baseDocumentSequence` is present and Extension 10 is in use, an implementation MUST compare it against the current document `sequence`.
+- If `PlaybookPatch.baseDocumentSequence` is present and Extension 10 is in use, an implementation MUST compare it against the current document `sequence`.
   - If they differ, the patch MUST be treated as concurrent and applied via merge/conflict rules (or rejected with a conflict error).
 
 ## Merge semantics (deterministic, non-LLM)
@@ -399,7 +399,7 @@ When merging concurrent updates:
 
 ## Best practices
 
-- Prefer **AcePatch** updates over rewriting `playbook.entries` wholesale.
+- Prefer **PlaybookPatch** updates over rewriting `playbook.entries` wholesale.
 - Keep entries **atomic** (one idea per entry) to make merge/dedup easier.
 - Add **evidence** as soon as you have it (links to PRs, traces, changeLog entries, benchmark results).
 - When revising an entry substantially, create a successor entry and connect them via `supersedes/supersededBy` rather than silently editing history.
@@ -432,7 +432,7 @@ plan: Plan(
   {
     "proposal": Narrative(
       "Overview",
-      "Curate reusable agent workflow strategies and warnings; update via AcePatch."
+      "Curate reusable agent workflow strategies and warnings; update via PlaybookPatch."
     )
   },
   Playbook(
@@ -545,7 +545,7 @@ plan: Plan(
     "narratives": {
       "proposal": {
         "title": "Overview",
-        "content": "Curate reusable agent workflow strategies and warnings; update via AcePatch."
+        "content": "Curate reusable agent workflow strategies and warnings; update via PlaybookPatch."
       }
     },
     "playbook": {

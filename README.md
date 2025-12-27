@@ -1398,7 +1398,7 @@ The ACE extension spec has been moved to `vAgenda-extension-ACE.md` (see that do
 - **Requires**: Extension 2 (Identifiers)
 - **Recommended**: Extension 10 (Version Control & Sync)
 
-ACE adds long-term memory via `playbook.entries` and supports incremental updates via `AcePatch` (see the extension document for full details).
+ACE adds long-term memory via `playbook.entries` and supports incremental updates via `PlaybookPatch` (see the extension document for full details).
 
 ---
 
@@ -1573,7 +1573,7 @@ Editors should:
 - Use three-way merge for conflict detection
 
 ### ACE
-See `vAgenda-extension-ACE.md` for ACE-specific best practices (e.g. grow-and-refine, evidence linking, dedup, and AcePatch update guidance).
+See `vAgenda-extension-ACE.md` for ACE-specific best practices (e.g. grow-and-refine, evidence linking, dedup, and PlaybookPatch update guidance).
 
 ---
 

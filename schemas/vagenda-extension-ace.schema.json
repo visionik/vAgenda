@@ -56,7 +56,7 @@
       },
       "additionalProperties": true
     },
-    "AcePatch": {
+    "PlaybookPatch": {
       "type": "object",
       "required": ["operations"],
       "properties": {
@@ -64,12 +64,12 @@
         "baseDocumentSequence": {"type": "integer", "minimum": 0},
         "operations": {
           "type": "array",
-          "items": {"$ref": "#/$defs/AcePatchOp"}
+          "items": {"$ref": "#/$defs/PlaybookPatchOp"}
         }
       },
       "additionalProperties": true
     },
-    "AcePatchOp": {
+    "PlaybookPatchOp": {
       "type": "object",
       "required": ["op"],
       "properties": {
