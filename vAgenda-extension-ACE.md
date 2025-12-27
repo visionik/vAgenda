@@ -12,6 +12,8 @@
 
 ACE (Agentic Context Engineering) is a way to make an agent’s “working context” improve over time **without** changing model weights.
 
+If these concepts feel difficult to understand, it’s partly because they are, and partly because this spec still has room to improve. ACE playbooks are a very new and evolving concept, and initial implementations are only just starting to be attempted and tested.
+
 In vAgenda terms:
 - TodoLists cover **short-term memory** (what to do next).
 - Plans cover **medium-term memory** (what/why/how for a piece of work).
@@ -19,7 +21,17 @@ In vAgenda terms:
 
 ### What ACE does
 
-ACE treats long-term context as a curated set of **itemized entries** (bullets) that can be:
+ACE playbooks capture long-term **lessons learned**.
+
+Where TodoLists and Plans primarily record **what** was (or will be) done and **why**, ACE playbooks record higher-level guidance such as:
+- what tends to work,
+- what tends to fail,
+- what to try next,
+- and what to avoid.
+
+Importantly, ACE is designed to be **log-like and reversible**: old guidance is not silently overwritten. Instead, entries are refined, superseded, deduplicated, or quarantined so that tools (and humans) can see how the playbook evolved over time.
+
+ACE treats long-term context as a curated set of **entries** that can be:
 - appended (growth),
 - refined (revision),
 - deduplicated,
@@ -43,7 +55,7 @@ A typical ACE loop:
    - Retrieve a relevant subset of entries for the next run.
 
 vAgenda supports this by:
-- representing long-term knowledge as `playbook.entries` (stable IDs, atomic bullets), and
+- representing long-term knowledge as `playbook.entries` (stable IDs, atomic entries), and
 - supporting incremental updates via `AcePatch` rather than whole-playbook rewrites.
 
 This extension is inspired by the ACE paradigm described in "Agentic Context Engineering" (arXiv:2510.04618).
@@ -64,7 +76,7 @@ The ACE extension schema is provided at `schemas/vagenda-extension-ace.schema.js
 
 This extension adds four core concepts:
 - `Playbook`: a container for entries and summary metrics.
-- `PlaybookEntry`: a single reusable bullet (strategy/rule/warning/etc.).
+- `PlaybookEntry`: a single reusable entry (strategy/rule/warning/etc.).
 - `AcePatch`: an incremental update envelope.
 - `AcePatchOp`: a single operation inside a patch.
 
@@ -75,7 +87,7 @@ Playbook {
   version: number           # Playbook version (monotonic; increments on update)
   created: datetime         # When playbook was created
   updated: datetime         # Last update time
-  entries: PlaybookEntry[]  # Itemized bullets (ACE-aligned)
+  entries: PlaybookEntry[]  # Itemized entries (ACE-aligned)
   metrics?: PlaybookMetrics # Optional summary stats
 }
 
@@ -83,7 +95,7 @@ PlaybookEntry {
   id: string                # Unique identifier within the playbook (stable)
   kind: enum                # "strategy" | "learning" | "rule" | "warning" | "note"
   title?: string            # Optional short label
-  text: string              # The bullet content (the load-bearing part)
+  text: string              # The entry content (the load-bearing part)
   tags?: string[]
   evidence?: string[]       # Human-readable pointers (links, change ids, outcomes)
   confidence?: number       # 0.0-1.0 (optional; omit when unknown)
@@ -150,7 +162,7 @@ Plan {
 
 ### Playbook
 
-A `Playbook` is the long-lived container. It holds the bullet list (`entries`) plus optional summary metrics.
+A `Playbook` is the long-lived container. It holds the entry list (`entries`) plus optional summary metrics.
 
 **JSON example:**
 
