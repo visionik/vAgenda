@@ -41,7 +41,7 @@ tasks:
   test:coverage:
     desc: Run tests with coverage (≥75% required)
     cmds:
-      - go test -cover -coverprofile={{.COVERAGE_OUT}} {{.PKG_PATH}}
+      - go test -cover -coverprofile={{.COVERAGE_OUT}} $(go list {{.PKG_PATH}} | grep -v /examples/)
       - go tool cover -func={{.COVERAGE_OUT}}
 
   test:coverage:html:

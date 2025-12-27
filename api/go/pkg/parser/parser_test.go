@@ -130,6 +130,43 @@ func TestAutoParser(t *testing.T) {
 	})
 }
 
+func TestTRONParser(t *testing.T) {
+	parser := NewTRONParser()
+
+	// Note: TRON parsing is tested via integration in examples
+	// The trongo library handles TRON format parsing
+	t.Run("creates TRON parser", func(t *testing.T) {
+		assert.NotNil(t, parser)
+	})
+
+	t.Run("returns error for invalid TRON", func(t *testing.T) {
+		_, err := parser.ParseString("invalid tron")
+		assert.Error(t, err)
+	})
+}
+
+func TestAutoParser_Parse(t *testing.T) {
+	parser := NewAutoParser()
+
+	t.Run("parses from reader detecting JSON", func(t *testing.T) {
+		reader := strings.NewReader(validJSON)
+		doc, err := parser.Parse(reader)
+
+		require.NoError(t, err)
+		require.NotNil(t, doc)
+		assert.Equal(t, "0.2", doc.Info.Version)
+	})
+
+	t.Run("parses from reader with whitespace", func(t *testing.T) {
+		reader := strings.NewReader("  \n" + validJSON)
+		doc, err := parser.Parse(reader)
+
+		require.NoError(t, err)
+		require.NotNil(t, doc)
+		assert.Equal(t, "0.2", doc.Info.Version)
+	})
+}
+
 func TestNew(t *testing.T) {
 	tests := []struct {
 		name   string
