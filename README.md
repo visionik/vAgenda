@@ -23,6 +23,26 @@ This enables both agentic systems and human-facing tools to share a common repre
 
 **Author**: Jonathan Taylor (visionik@pobox.com)
 
+## Goals
+
+vContext aims to establish a universal, open standard for agentic memory systems that:
+
+1. MUST **Reduce LLM context window overhead** by representing key contextual memory with effecient structures 
+
+2. MUST **Enable interoperability** across different AI coding agents and tools by providing a common format for representing work items, plans, and accumulated knowledge
+
+3. MUST **Support the full lifecycle** of agentic work from immediate task execution (TodoLists) to strategic planning (Plans) to long-term knowledge retention (Playbooks)
+
+4. MAY **Prevent vendor lock-in** by ensuring all agentic memory is stored in an open, documented format that any tool can read and write
+
+5. MUST **Scale from simple to complex** via a modular extension system that keeps the core specification minimal while supporting advanced features when needed
+
+6. MAY **Bridge human and AI collaboration** by maintaining both machine-optimized (TRON) and universally-compatible (JSON) representations of the same data
+
+7. MAY **also be use for non-AI tools** that work with todo lists, plans, and playbooks.
+
+By standardizing how agentic systems remember and organize their work, vContext enables a future where agents and tools can seamlessly share context, learn from each other's experiences, and collaborate across platforms.
+
 ## Changelog: v0.2 → v0.3
 
 **Breaking Changes**:
