@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://vagenda.dev/schemas/vagenda-extension-playbooks.schema.json",
-  "title": "vAgenda Extension Schema: Playbooks",
-  "description": "JSON Schema for vAgenda Playbooks extension types (v0.3 extension).",
+  "$id": "https://vcontext.dev/schemas/vcontext-extension-playbooks.schema.json",
+  "title": "vContext Extension Schema: Playbooks",
+  "description": "JSON Schema for vContext Playbooks extension types (v0.3 extension).",
   "type": "object",
   "additionalProperties": true,
   "$defs": {
@@ -11,8 +11,8 @@
       "required": ["version", "created", "updated", "items"],
       "properties": {
         "version": {"type": "integer", "minimum": 0},
-        "created": {"$ref": "./vagenda-core.schema.json#/$defs/dateTime"},
-        "updated": {"$ref": "./vagenda-core.schema.json#/$defs/dateTime"},
+        "created": {"$ref": "./vcontext-core.schema.json#/$defs/dateTime"},
+        "updated": {"$ref": "./vcontext-core.schema.json#/$defs/dateTime"},
         "items": {
           "type": "array",
           "items": {"$ref": "#/$defs/PlaybookItem"}
@@ -47,7 +47,7 @@
         },
 
         "feedbackType": {"enum": ["humanReview", "executionOutcome", "selfReport", "unknown"]},
-        "createdAt": {"$ref": "./vagenda-core.schema.json#/$defs/dateTime"},
+        "createdAt": {"$ref": "./vcontext-core.schema.json#/$defs/dateTime"},
 
         "status": {"enum": ["active", "deprecated", "quarantined"]},
         "deprecatedReason": {"type": "string"},
@@ -75,7 +75,7 @@
       "properties": {
         "totalEntries": {"type": "integer", "minimum": 0},
         "averageConfidence": {"type": "number", "minimum": 0, "maximum": 1},
-        "lastUpdated": {"$ref": "./vagenda-core.schema.json#/$defs/dateTime"}
+        "lastUpdated": {"$ref": "./vcontext-core.schema.json#/$defs/dateTime"}
       },
       "additionalProperties": true
     }

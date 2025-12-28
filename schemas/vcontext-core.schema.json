@@ -1,15 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://vagenda.dev/schemas/vagenda-core.schema.json",
-  "title": "vAgenda Core Schema",
-  "description": "JSON Schema for vAgenda core document structure (v0.3). Extensions may add fields; unknown fields are allowed unless otherwise stated.",
+  "$id": "https://vcontext.dev/schemas/vcontext-core.schema.json",
+  "title": "vContext Core Schema",
+  "description": "JSON Schema for vContext core document structure (v0.3). Extensions may add fields; unknown fields are allowed unless otherwise stated.",
   "type": "object",
-  "required": ["vAgendaInfo"],
+  "required": ["vContextInfo"],
   "properties": {
-    "vAgendaInfo": {"$ref": "#/$defs/vAgendaInfo"},
+    "vContextInfo": {"$ref": "#/$defs/vContextInfo"},
     "todoList": {"$ref": "#/$defs/TodoList"},
     "plan": {"$ref": "#/$defs/Plan"},
-    "playbook": {"$ref": "./vagenda-extension-playbooks.schema.json#/$defs/Playbook"}
+    "playbook": {"$ref": "./vcontext-extension-playbooks.schema.json#/$defs/Playbook"}
   },
   "oneOf": [
     {
@@ -27,7 +27,7 @@
   ],
   "additionalProperties": true,
   "$defs": {
-    "vAgendaInfo": {
+    "vContextInfo": {
       "type": "object",
       "required": ["version"],
       "properties": {
@@ -213,7 +213,7 @@
           "type": "object",
           "required": ["uri", "type"],
           "properties": {
-            "type": {"enum": ["x-vagenda/todoList", "x-vagenda/plan", "x-vagenda/playbook"]}
+            "type": {"enum": ["x-vcontext/todoList", "x-vcontext/plan", "x-vcontext/playbook"]}
           }
         }
       ]

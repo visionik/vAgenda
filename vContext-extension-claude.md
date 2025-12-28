@@ -1,4 +1,4 @@
-# vAgenda Extension Proposal: Claude AI Integration
+# vContext Extension Proposal: Claude AI Integration
 
 > **VERY EARLY DRAFT**: This is an initial proposal and subject to significant change. Comments, feedback, and suggestions are strongly encouraged. Please provide input via GitHub issues or discussions.
 
@@ -12,7 +12,7 @@
 
 [Claude](https://claude.ai) is Anthropic's family of large language models with strong reasoning capabilities, long context windows (up to 200K tokens), and specialized features for coding assistance. Claude is widely used in agentic coding systems like Aider, Claude Code, Cursor, and Windsurf.
 
-This extension enables Claude to natively read, write, and reason about vAgenda documents as part of its coding workflow. It provides Claude with structured memory formats optimized for its context window, reasoning patterns, and tool use capabilities.
+This extension enables Claude to natively read, write, and reason about vContext documents as part of its coding workflow. It provides Claude with structured memory formats optimized for its context window, reasoning patterns, and tool use capabilities.
 
 ## Motivation
 
@@ -23,14 +23,14 @@ This extension enables Claude to natively read, write, and reason about vAgenda 
 - Artifacts for iterative refinement
 - Conversation continuity across sessions
 
-**vAgenda benefits for Claude**:
+**vContext benefits for Claude**:
 - **Token efficiency**: TRON format reduces context consumption by 35-40%
 - **Structured memory**: TodoLists, Plans, and playbooks provide clear memory hierarchy
-- **Cross-session continuity**: vAgenda documents persist Claude's reasoning across conversations
-- **Multi-agent coordination**: When multiple Claude instances work together, vAgenda provides shared state
+- **Cross-session continuity**: vContext documents persist Claude's reasoning across conversations
+- **Multi-agent coordination**: When multiple Claude instances work together, vContext provides shared state
 - **Knowledge accumulation**: Playbooks let Claude build institutional knowledge over time
 
-**Integration goal**: Make vAgenda Claude's native memory format, enabling seamless persistence and retrieval of work state, plans, and accumulated learnings.
+**Integration goal**: Make vContext Claude's native memory format, enabling seamless persistence and retrieval of work state, plans, and accumulated learnings.
 
 ## Dependencies
 
@@ -91,23 +91,23 @@ ClaudePromptTemplate {
 
 **Problem**: Claude conversations reset context. Work state is lost between sessions.
 
-**Solution**: Export to vAgenda at end of session, import at start of next session.
+**Solution**: Export to vContext at end of session, import at start of next session.
 
 **End of session**:
 ```markdown
 # Claude's final message in conversation
-I've completed the authentication implementation. Let me create a vAgenda document 
+I've completed the authentication implementation. Let me create a vContext document 
 to preserve this work state:
 
 <create_file>
-vAgenda/session-2025-12-27-auth.tron
+vContext/session-2025-12-27-auth.tron
 
-class vAgendaInfo: version, author
+class vContextInfo: version, author
 class TodoList: items
 class TodoItem: id, title, status, claudeContext
 class ClaudeContext: conversationId, modelVersion, tokensUsed
 
-vAgendaInfo: vAgendaInfo("0.2", "claude-3.5-sonnet")
+vContextInfo: vContextInfo("0.2", "claude-3.5-sonnet")
 todoList: TodoList([
   TodoItem(
     "1", 
@@ -130,13 +130,13 @@ todoList: TodoList([
 ])
 </create_file>
 
-To continue this work in a new session, share this vAgenda file and I'll pick up where I left off.
+To continue this work in a new session, share this vContext file and I'll pick up where I left off.
 ```
 
 **Start of next session**:
 ```markdown
-# User shares vAgenda file
-I'd like to continue the auth work. Here's the vAgenda state: [attaches file]
+# User shares vContext file
+I'd like to continue the auth work. Here's the vContext state: [attaches file]
 
 # Claude responds
 I can see we completed JWT token generation and are partway through the refresh endpoint.
@@ -148,22 +148,22 @@ since it's partially complete. Let me check the current implementation...
 
 **Problem**: Complex features need upfront design and coordination across multiple sessions.
 
-**Solution**: Create vAgenda Plan with Claude's reasoning, use it to guide implementation.
+**Solution**: Create vContext Plan with Claude's reasoning, use it to guide implementation.
 
 **Planning conversation**:
 ```markdown
 # User
 I need to add OAuth2 support. Help me create a plan.
 
-# Claude creates vAgenda Plan
-I'll create a structured plan in vAgenda format:
+# Claude creates vContext Plan
+I'll create a structured plan in vContext format:
 
-class vAgendaInfo: version
+class vContextInfo: version
 class Plan: title, status, narratives, phases, claudeThinking
 class Phase: title, status
 class Narrative: title, content
 
-vAgendaInfo: vAgendaInfo("0.2")
+vContextInfo: vContextInfo("0.2")
 plan: Plan(
   "Add OAuth2 Support",
   "draft",
@@ -202,14 +202,14 @@ plan: Plan(
 # Claude reflects on completed work
 Let me document what I learned for future projects:
 
-class vAgendaInfo: version
+class vContextInfo: version
 class Plan: title, status, playbook
 class Playbook: version, strategies, learnings
 class Strategy: id, title, description, confidence
 class Learning: id, content, confidence, discoveredBy
 class Agent: id, type, name, model
 
-vAgendaInfo: vAgendaInfo("0.2")
+vContextInfo: vContextInfo("0.2")
 plan: Plan(
   "OAuth Implementation Retrospective",
   "completed",
@@ -264,23 +264,23 @@ Shall I create a plan following these strategies?
 
 **Problem**: Claude Projects provide project-specific context, but no structured task memory.
 
-**Solution**: Each Claude Project has an associated vAgenda document for work tracking.
+**Solution**: Each Claude Project has an associated vContext document for work tracking.
 
 **Project setup**:
 ```markdown
 # In Claude Project's custom instructions or knowledge
-This project uses vAgenda for structured memory. The project's work state is in:
-- vAgenda/current.tron - Active todos and current work
-- vAgenda/plans/*.tron - Design documents and plans
-- vAgenda/playbook.tron - Accumulated strategies and learnings
+This project uses vContext for structured memory. The project's work state is in:
+- vContext/current.tron - Active todos and current work
+- vContext/plans/*.tron - Design documents and plans
+- vContext/playbook.tron - Accumulated strategies and learnings
 
 When starting work:
-1. Read vAgenda/current.tron to see active tasks
+1. Read vContext/current.tron to see active tasks
 2. Check relevant plans for context
 3. Reference playbook for applicable strategies
 
 When ending work:
-1. Update vAgenda/current.tron with progress
+1. Update vContext/current.tron with progress
 2. Document any new learnings in playbook
 ```
 
@@ -291,27 +291,27 @@ When ending work:
 ```markdown
 # Add to Claude's system prompt or project instructions
 
-You have access to vAgenda documents for structured memory:
+You have access to vContext documents for structured memory:
 
-**Reading vAgenda**:
+**Reading vContext**:
 - TodoLists show current work and priorities
 - Plans provide design context and reasoning
 - Playbooks contain accumulated strategies/learnings
 
-**Writing vAgenda**:
+**Writing vContext**:
 - Use TRON format (more efficient than JSON)
 - Include claudeContext for session continuity
 - Document your reasoning in plan narratives
 - Extract learnings into playbooks at project milestones
 
 **Format**:
-vAgenda uses TRON (superset of JSON). Example:
+vContext uses TRON (superset of JSON). Example:
 ```tron
-class vAgendaInfo: version
+class vContextInfo: version
 class TodoList: items
 class TodoItem: id, title, status
 
-vAgendaInfo: vAgendaInfo("0.2")
+vContextInfo: vContextInfo("0.2")
 todoList: TodoList([
   TodoItem("1", "Fix bug", "completed"),
   TodoItem("2", "Add tests", "pending")
@@ -326,11 +326,11 @@ Prefer TRON over JSON for ~35% token savings.
 **Aider integration**:
 ```python
 # In .aider.conf.yml
-vagenda:
+vcontext:
   enabled: true
-  todo_file: vAgenda/current.tron
-  plans_dir: vAgenda/plans/
-  playbook_file: vAgenda/playbook.tron
+  todo_file: vContext/current.tron
+  plans_dir: vContext/plans/
+  playbook_file: vContext/playbook.tron
   
 # Aider can read these at session start, update at session end
 ```
@@ -339,21 +339,21 @@ vagenda:
 ```json
 // In .cursor/settings.json
 {
-  "vagenda.enabled": true,
-  "vagenda.autoRead": true,
-  "vagenda.autoWrite": true,
-  "vagenda.location": "vAgenda/"
+  "vcontext.enabled": true,
+  "vcontext.autoRead": true,
+  "vcontext.autoWrite": true,
+  "vcontext.location": "vContext/"
 }
 ```
 
 ### For Model Context Protocol (MCP) Servers
 
 ```typescript
-// MCP server exposing vAgenda to Claude
+// MCP server exposing vContext to Claude
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 
 const server = new Server({
-  name: "vagenda-server",
+  name: "vcontext-server",
   version: "0.1.0"
 }, {
   capabilities: {
@@ -365,17 +365,17 @@ const server = new Server({
 // Resource: current todos
 server.setRequestHandler(ListResourcesRequestSchema, async () => ({
   resources: [{
-    uri: "vagenda://todos/current",
+    uri: "vcontext://todos/current",
     name: "Current Tasks",
-    description: "Active todo list from vAgenda",
+    description: "Active todo list from vContext",
     mimeType: "text/x-tron"
   }]
 }));
 
 // Tool: create todo item
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name === "vagenda_create_todo") {
-    // Parse vAgenda file, add item, write back
+  if (request.params.name === "vcontext_create_todo") {
+    // Parse vContext file, add item, write back
     // Return success message
   }
 });
@@ -416,11 +416,11 @@ Even with Claude's massive context window, token efficiency matters:
 
 **TRON** (~1,700 tokens, 39% reduction):
 ```tron
-class vAgendaInfo: version
+class vContextInfo: version
 class TodoList: items
 class TodoItem: id, title, status, dependencies
 
-vAgendaInfo: vAgendaInfo("0.2")
+vContextInfo: vContextInfo("0.2")
 todoList: TodoList([
   TodoItem("1", "Implement JWT auth", "inProgress", []),
   TodoItem("2", "Add auth tests", "pending", ["1"]),
@@ -444,12 +444,12 @@ todoList: TodoList([
 
 **Beads Interop Extension**:
 - Beads provides execution tracking, Claude provides reasoning/planning
-- Claude can read Beads state, add context via vAgenda Plans
+- Claude can read Beads state, add context via vContext Plans
 - Claude's learnings feed back into future Beads sessions
 
 ## Open Questions
 
-1. **Should Claude auto-generate vAgenda docs?**
+1. **Should Claude auto-generate vContext docs?**
    - Pro: Seamless memory without user intervention
    - Con: User may not want every session persisted
    - **Proposal**: Opt-in via project instructions or explicit user request
@@ -459,13 +459,13 @@ todoList: TodoList([
    - Each Claude instance gets a fork, merge conflicts resolved by human or lead agent
    - **Proposal**: Document multi-Claude workflows in best practices
 
-3. **Should vAgenda replace Claude Projects' built-in memory?**
+3. **Should vContext replace Claude Projects' built-in memory?**
    - No - Claude Projects are Anthropic's feature
-   - **Proposal**: vAgenda complements Projects by adding structured task memory
+   - **Proposal**: vContext complements Projects by adding structured task memory
 
-4. **Token budget for vAgenda in Claude's context?**
-   - Recommendation: ~5-10% of context window for vAgenda
-   - For 200K context: 10-20K tokens for vAgenda state
+4. **Token budget for vContext in Claude's context?**
+   - Recommendation: ~5-10% of context window for vContext
+   - For 200K context: 10-20K tokens for vContext state
    - **Proposal**: Document token budgeting guidelines
 
 ## Examples
@@ -474,23 +474,23 @@ See Usage Patterns section for detailed examples.
 
 ## Migration Path
 
-**Phase 1**: Manual vAgenda usage
-- Users create vAgenda documents by hand
+**Phase 1**: Manual vContext usage
+- Users create vContext documents by hand
 - Claude reads them for context, suggests updates
 - No tool integration yet
 
 **Phase 2**: Tool-assisted (current focus)
-- Aider, Cursor, other tools auto-read/write vAgenda
-- Claude's responses include vAgenda updates
-- System prompts guide Claude's vAgenda usage
+- Aider, Cursor, other tools auto-read/write vContext
+- Claude's responses include vContext updates
+- System prompts guide Claude's vContext usage
 
 **Phase 3**: Native integration
-- MCP servers expose vAgenda as resources/tools
-- Claude can directly create/update vAgenda via tool calls
-- Anthropic potentially adds vAgenda awareness to Claude
+- MCP servers expose vContext as resources/tools
+- Claude can directly create/update vContext via tool calls
+- Anthropic potentially adds vContext awareness to Claude
 
 **Phase 4**: Multi-agent orchestration
-- Multiple Claude instances coordinate via shared vAgenda
+- Multiple Claude instances coordinate via shared vContext
 - Automatic conflict resolution
 - Distributed playbook learning
 
@@ -498,16 +498,16 @@ See Usage Patterns section for detailed examples.
 
 This is a **draft proposal**. Feedback needed:
 
-1. Should Claude auto-detect vAgenda files in project context?
-2. What should default token budget be for vAgenda in Claude's context?
-3. How should Claude handle vAgenda format errors (invalid TRON)?
+1. Should Claude auto-detect vContext files in project context?
+2. What should default token budget be for vContext in Claude's context?
+3. How should Claude handle vContext format errors (invalid TRON)?
 4. Should this extension define Claude-specific prompt templates?
 
-**Discuss**: https://github.com/visionik/vAgenda/discussions
+**Discuss**: https://github.com/visionik/vContext/discussions
 
 ## References
 
-- vAgenda Specification: https://github.com/visionik/vAgenda
+- vContext Specification: https://github.com/visionik/vContext
 - Claude: https://claude.ai
 - Anthropic Model Context Protocol: https://modelcontextprotocol.io
 - Aider: https://github.com/paul-gauthier/aider

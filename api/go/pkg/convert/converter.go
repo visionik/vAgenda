@@ -1,4 +1,4 @@
-// Package convert provides format conversion utilities for vAgenda documents.
+// Package convert provides format conversion utilities for vContext documents.
 package convert
 
 import (
@@ -8,7 +8,7 @@ import (
 	"io"
 
 	"github.com/tron-format/trongo/pkg/tron"
-	"github.com/visionik/vAgenda/api/go/pkg/core"
+	"github.com/visionik/vContext/api/go/pkg/core"
 )
 
 var (

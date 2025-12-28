@@ -1,6 +1,6 @@
 package core
 
-// Document manipulation methods for editing vAgenda documents after creation.
+// Document manipulation methods for editing vContext documents after creation.
 
 // AddTodoItem adds a new item to the TodoList.
 // Returns an error if the document doesn't contain a TodoList.

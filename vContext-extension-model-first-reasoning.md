@@ -1,4 +1,4 @@
-# vAgenda Extension: Model-First Reasoning (MFR)
+# vContext Extension: Model-First Reasoning (MFR)
 
 **Extension Name**: Model-First Reasoning (MFR)  
 **Version**: 0.2 (Simplified)  
@@ -10,7 +10,7 @@
 
 ## Overview
 
-This extension adds explicit problem modeling to vAgenda Plans, inspired by [Kumar & Rana (2025)](https://arxiv.org/abs/2512.14474). Model-First Reasoning (MFR) argues that LLM planning failures arise from **implicit and unstable problem representations**. By requiring explicit models—defining entities, state, actions with preconditions/effects, and constraints—before generating plans, we dramatically reduce hallucinations and constraint violations.
+This extension adds explicit problem modeling to vContext Plans, inspired by [Kumar & Rana (2025)](https://arxiv.org/abs/2512.14474). Model-First Reasoning (MFR) argues that LLM planning failures arise from **implicit and unstable problem representations**. By requiring explicit models—defining entities, state, actions with preconditions/effects, and constraints—before generating plans, we dramatically reduce hallucinations and constraint violations.
 
 **Key insight**: **PlanItems are already actions.** Rather than creating separate workflow types, we extend Plans and PlanItems to capture problem model semantics directly.
 
@@ -31,7 +31,7 @@ This extension adds explicit problem modeling to vAgenda Plans, inspired by [Kum
 ## Dependencies
 
 **Required:**
-- vAgenda Core (Plan, PlanItem)
+- vContext Core (Plan, PlanItem)
 - Extension 2 (Identifiers) - for referencing entities
 
 **Recommended:**
@@ -50,7 +50,7 @@ Rather than introducing separate `ProblemModel` and `Action` types, we recognize
 - **PlanItems** = The actions to execute (already ordered, have status, dependencies)
 - **PlanItem preconditions/effects** = Action semantics (new fields)
 
-This keeps vAgenda simple while enabling full MFR validation.
+This keeps vContext simple while enabling full MFR validation.
 
 ---
 
@@ -284,7 +284,7 @@ TemplateParam {
 
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3"
   },
   "plan": {
@@ -498,7 +498,7 @@ TemplateParam {
 
 ```json
 {
-  "vAgendaInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.3"},
   "playbook": {
     "id": "backend-playbook",
     "title": "Backend Development Patterns",
@@ -862,8 +862,8 @@ Output as Plan.items array.
 - **Fikes, R. & Nilsson, N.** (1971). "STRIPS: A New Approach to the Application of Theorem Proving to Problem Solving".
 - **McDermott, D. et al.** (1998). "PDDL - The Planning Domain Definition Language".
 
-### vAgenda
-- vAgenda Core Specification v0.3
+### vContext
+- vContext Core Specification v0.3
 - Extension 2: Identifiers
 - Extension 4: Hierarchical Structures
 - Extension 12: Playbooks

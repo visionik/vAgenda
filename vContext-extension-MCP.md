@@ -1,4 +1,4 @@
-# vAgenda Extension Proposal: Model Context Protocol (MCP) Integration
+# vContext Extension Proposal: Model Context Protocol (MCP) Integration
 
 > **VERY EARLY DRAFT**: This is an initial proposal and subject to significant change. Comments, feedback, and suggestions are strongly encouraged. Please provide input via GitHub issues or discussions.
 
@@ -12,7 +12,7 @@
 
 [Model Context Protocol (MCP)](https://modelcontextprotocol.io) is an open protocol created by Anthropic that enables AI models to securely connect to external data sources and tools. MCP provides a standardized way for LLMs to access resources (data) and invoke tools (operations) across different systems and applications.
 
-This extension defines how vAgenda documents are exposed as MCP resources and how vAgenda operations are exposed as MCP tools. It makes vAgenda a first-class MCP resource type, enabling AI agents to discover, read, and modify vAgenda documents through a standardized protocol.
+This extension defines how vContext documents are exposed as MCP resources and how vContext operations are exposed as MCP tools. It makes vContext a first-class MCP resource type, enabling AI agents to discover, read, and modify vContext documents through a standardized protocol.
 
 ## Motivation
 
@@ -23,20 +23,20 @@ This extension defines how vAgenda documents are exposed as MCP resources and ho
 - Transport agnostic (stdio, SSE, HTTP)
 - Growing ecosystem support (Claude, Cursor, Aider, etc.)
 
-**vAgenda benefits from MCP**:
-- **Discoverability**: AI agents can find and use vAgenda without custom code
+**vContext benefits from MCP**:
+- **Discoverability**: AI agents can find and use vContext without custom code
 - **Standardization**: CRUD operations on todos/plans follow consistent patterns
 - **Real-time access**: Agents get live updates instead of polling files
-- **Multi-user coordination**: Multiple agents/humans work on shared vAgenda with permissions
+- **Multi-user coordination**: Multiple agents/humans work on shared vContext with permissions
 - **Ecosystem integration**: Works automatically with MCP-enabled tools
 
-**Integration goal**: Make vAgenda the standard memory format for MCP-enabled agentic systems, providing structured persistence for todos, plans, and accumulated learnings.
+**Integration goal**: Make vContext the standard memory format for MCP-enabled agentic systems, providing structured persistence for todos, plans, and accumulated learnings.
 
 ## Dependencies
 
 **Required**:
 - Extension 2 (Identifiers) - for referencing specific items via MCP tools
-- Core vAgenda types (TodoList, TodoItem, Plan, Phase, Narrative)
+- Core vContext types (TodoList, TodoItem, Plan, Phase, Narrative)
 
 **Recommended**:
 - Extension 1 (Timestamps) - track when MCP operations occurred
@@ -46,22 +46,22 @@ This extension defines how vAgenda documents are exposed as MCP resources and ho
 
 ## MCP Resources
 
-Resources are read-only endpoints that expose vAgenda documents. Clients use MCP's `resources/read` to fetch these.
+Resources are read-only endpoints that expose vContext documents. Clients use MCP's `resources/read` to fetch these.
 
 ### Resource URIs
 
 ```typescript
-// Standard vAgenda resources
-vagenda://todos/current              # Current TodoList
-vagenda://todos/{id}                 # Specific TodoList by ID
-vagenda://plans/current              # Current Plan
-vagenda://plans/{id}                 # Specific Plan by ID
-vagenda://playbook                   # Project playbook
-vagenda://playbook/{category}        # Playbook section (strategies, decisions, etc.)
+// Standard vContext resources
+vcontext://todos/current              # Current TodoList
+vcontext://todos/{id}                 # Specific TodoList by ID
+vcontext://plans/current              # Current Plan
+vcontext://plans/{id}                 # Specific Plan by ID
+vcontext://playbook                   # Project playbook
+vcontext://playbook/{category}        # Playbook section (strategies, decisions, etc.)
 
 // Collection resources
-vagenda://todos                      # List all TodoLists
-vagenda://plans                      # List all Plans
+vcontext://todos                      # List all TodoLists
+vcontext://plans                      # List all Plans
 ```
 
 ### Resource Schema
@@ -87,19 +87,19 @@ interface VAgendaResource {
   },
   "resources": [
     {
-      "uri": "vagenda://todos/current",
+      "uri": "vcontext://todos/current",
       "name": "Current Tasks",
       "description": "Active TodoList for this project",
       "mimeType": "text/x-tron"
     },
     {
-      "uri": "vagenda://plans/current",
+      "uri": "vcontext://plans/current",
       "name": "Current Plan",
       "description": "Active implementation plan",
       "mimeType": "text/x-tron"
     },
     {
-      "uri": "vagenda://playbook",
+      "uri": "vcontext://playbook",
       "name": "Project Playbook",
       "description": "Accumulated learnings (playbook)",
       "mimeType": "text/x-tron"
@@ -119,7 +119,7 @@ Client requests resource content:
   "id": 1,
   "method": "resources/read",
   "params": {
-    "uri": "vagenda://todos/current"
+    "uri": "vcontext://todos/current"
   }
 }
 
@@ -130,9 +130,9 @@ Client requests resource content:
   "result": {
     "contents": [
       {
-        "uri": "vagenda://todos/current",
+        "uri": "vcontext://todos/current",
         "mimeType": "text/x-tron",
-        "text": "class vAgendaInfo: version\nclass TodoList: items\n..."
+        "text": "class vContextInfo: version\nclass TodoList: items\n..."
       }
     ]
   }
@@ -141,13 +141,13 @@ Client requests resource content:
 
 ## MCP Tools
 
-Tools are operations that modify vAgenda state. Clients use MCP's `tools/call` to invoke them.
+Tools are operations that modify vContext state. Clients use MCP's `tools/call` to invoke them.
 
 ### Core Tools
 
 ```typescript
 // Create a new TodoItem
-vagenda_create_todo({
+vcontext_create_todo({
   title: string,
   description?: string,
   status?: TodoStatus,
@@ -155,7 +155,7 @@ vagenda_create_todo({
 })
 
 // Update a TodoItem
-vagenda_update_todo({
+vcontext_update_todo({
   id: string,
   title?: string,
   description?: string,
@@ -164,12 +164,12 @@ vagenda_update_todo({
 })
 
 // Delete a TodoItem
-vagenda_delete_todo({
+vcontext_delete_todo({
   id: string
 })
 
 // Create a new Plan
-vagenda_create_plan({
+vcontext_create_plan({
   title: string,
   status?: PlanStatus,
   narratives?: Record<string, Narrative>,
@@ -177,7 +177,7 @@ vagenda_create_plan({
 })
 
 // Update a Plan
-vagenda_update_plan({
+vcontext_update_plan({
   id: string,
   title?: string,
   status?: PlanStatus,
@@ -185,14 +185,14 @@ vagenda_update_plan({
 })
 
 // Add a Phase to a Plan
-vagenda_add_phase({
+vcontext_add_phase({
   planId: string,
   phase: Phase,
   position?: number                # Insert at position, defaults to end
 })
 
 // Update a Phase
-vagenda_update_phase({
+vcontext_update_phase({
   planId: string,
   phaseId: string,
   title?: string,
@@ -200,7 +200,7 @@ vagenda_update_phase({
 })
 
 // Add learning to playbook
-vagenda_add_learning({
+vcontext_add_learning({
   category: string,                # "strategies" | "decisions" | "patterns" | "gotchas"
   title: string,
   content: string,
@@ -208,7 +208,7 @@ vagenda_add_learning({
 })
 
 // Query playbook learnings
-vagenda_query_playbook({
+vcontext_query_playbook({
   category?: string,
   tags?: string[],
   searchText?: string
@@ -217,12 +217,12 @@ vagenda_query_playbook({
 
 ### Tool Input Schemas
 
-Full JSON schema example for `vagenda_create_todo`:
+Full JSON schema example for `vcontext_create_todo`:
 
 ```json
 {
-  "name": "vagenda_create_todo",
-  "description": "Create a new todo item in vAgenda",
+  "name": "vcontext_create_todo",
+  "description": "Create a new todo item in vContext",
   "inputSchema": {
     "type": "object",
     "properties": {
@@ -286,20 +286,20 @@ Full JSON schema example for `vagenda_create_todo`:
 
 ## MCP Prompts
 
-Prompts are pre-defined templates for common vAgenda workflows. They help AI agents use vAgenda effectively.
+Prompts are pre-defined templates for common vContext workflows. They help AI agents use vContext effectively.
 
 ```typescript
 // Prompt declarations
 {
   "prompts": [
     {
-      "name": "vagenda_session_start",
-      "description": "Load vAgenda context at the start of a coding session",
+      "name": "vcontext_session_start",
+      "description": "Load vContext context at the start of a coding session",
       "arguments": []
     },
     {
-      "name": "vagenda_session_end",
-      "description": "Save current work state to vAgenda at session end",
+      "name": "vcontext_session_end",
+      "description": "Save current work state to vContext at session end",
       "arguments": [
         {
           "name": "summary",
@@ -309,12 +309,12 @@ Prompts are pre-defined templates for common vAgenda workflows. They help AI age
       ]
     },
     {
-      "name": "vagenda_plan_review",
+      "name": "vcontext_plan_review",
       "description": "Review current plan and suggest next steps",
       "arguments": []
     },
     {
-      "name": "vagenda_add_learning",
+      "name": "vcontext_add_learning",
       "description": "Extract a learning from recent work and add to playbook",
       "arguments": [
         {
@@ -330,19 +330,19 @@ Prompts are pre-defined templates for common vAgenda workflows. They help AI age
 
 ### Example Prompt Content
 
-When `vagenda_session_start` is invoked, the server returns:
+When `vcontext_session_start` is invoked, the server returns:
 
 ```
-You are starting a new coding session. Here is the current vAgenda context:
+You are starting a new coding session. Here is the current vContext context:
 
 ## Current Tasks (TodoList)
-[reads vagenda://todos/current]
+[reads vcontext://todos/current]
 
 ## Current Plan (if any)
-[reads vagenda://plans/current]
+[reads vcontext://plans/current]
 
 ## Recent Learnings
-[reads vagenda://playbook with recent items]
+[reads vcontext://playbook with recent items]
 
 Based on this context, what would you like to work on?
 ```
@@ -351,13 +351,13 @@ Based on this context, what would you like to work on?
 
 ### Pattern 1: MCP Server Discovery
 
-AI agent discovers vAgenda MCP server:
+AI agent discovers vContext MCP server:
 
 ```typescript
 // Agent connects to MCP server (via stdio, SSE, or HTTP)
 const client = new MCPClient({
   transport: new StdioClientTransport({
-    command: "vagenda-mcp-server",
+    command: "vcontext-mcp-server",
     args: ["--project", "/path/to/project"]
   })
 });
@@ -366,21 +366,21 @@ await client.connect();
 
 // Discover available resources
 const resources = await client.listResources();
-// Returns: vagenda://todos/current, vagenda://plans/current, etc.
+// Returns: vcontext://todos/current, vcontext://plans/current, etc.
 
 // Discover available tools
 const tools = await client.listTools();
-// Returns: vagenda_create_todo, vagenda_update_todo, etc.
+// Returns: vcontext_create_todo, vcontext_update_todo, etc.
 ```
 
-### Pattern 2: Reading vAgenda via Resources
+### Pattern 2: Reading vContext via Resources
 
 Claude reads current tasks at session start:
 
 ```typescript
 // Claude (via MCP client) reads current todos
 const response = await client.readResource({
-  uri: "vagenda://todos/current"
+  uri: "vcontext://todos/current"
 });
 
 // Response contains TRON document
@@ -390,14 +390,14 @@ const tronContent = response.contents[0].text;
 // Can reason about priorities, dependencies, etc.
 ```
 
-### Pattern 3: Modifying vAgenda via Tools
+### Pattern 3: Modifying vContext via Tools
 
-Claude completes a task and updates vAgenda:
+Claude completes a task and updates vContext:
 
 ```typescript
 // Claude invokes tool to mark task completed
 const result = await client.callTool({
-  name: "vagenda_update_todo",
+  name: "vcontext_update_todo",
   arguments: {
     id: "todo-abc123",
     status: "completed"
@@ -405,18 +405,18 @@ const result = await client.callTool({
 });
 
 // Tool returns success confirmation
-// vAgenda document is updated
+// vContext document is updated
 // Other connected agents see the change
 ```
 
 ### Pattern 4: Real-Time Collaboration
 
-Multiple agents working on shared vAgenda:
+Multiple agents working on shared vContext:
 
 ```typescript
 // Agent A updates todo status
 await clientA.callTool({
-  name: "vagenda_update_todo",
+  name: "vcontext_update_todo",
   arguments: { id: "todo-1", status: "inProgress" }
 });
 
@@ -425,37 +425,37 @@ await clientA.callTool({
 {
   "method": "notifications/resources/updated",
   "params": {
-    "uri": "vagenda://todos/current"
+    "uri": "vcontext://todos/current"
   }
 }
 
 // Agent B receives notification and re-reads resource
 const updated = await clientB.readResource({
-  uri: "vagenda://todos/current"
+  uri: "vcontext://todos/current"
 });
 // Agent B now sees Agent A's changes
 ```
 
 ### Pattern 5: Integration with Claude Desktop
 
-Claude Desktop app configured to use vAgenda MCP server:
+Claude Desktop app configured to use vContext MCP server:
 
 ```json
 // claude_desktop_config.json
 {
   "mcpServers": {
-    "vagenda": {
-      "command": "vagenda-mcp-server",
+    "vcontext": {
+      "command": "vcontext-mcp-server",
       "args": ["--project", "~/Projects/myapp"],
       "env": {
-        "VAGENDA_FORMAT": "tron"
+        "VCONTEXT_FORMAT": "tron"
       }
     }
   }
 }
 ```
 
-When Claude Desktop starts, it automatically connects to vAgenda server and has access to all resources and tools.
+When Claude Desktop starts, it automatically connects to vContext server and has access to all resources and tools.
 
 ## Implementation Notes
 
@@ -481,7 +481,7 @@ class VAgendaMCPServer {
     this.projectPath = projectPath;
     this.server = new Server(
       {
-        name: "vagenda-mcp-server",
+        name: "vcontext-mcp-server",
         version: "0.1.0",
       },
       {
@@ -503,17 +503,17 @@ class VAgendaMCPServer {
       async () => ({
         resources: [
           {
-            uri: "vagenda://todos/current",
+            uri: "vcontext://todos/current",
             name: "Current Tasks",
             mimeType: "text/x-tron",
           },
           {
-            uri: "vagenda://plans/current",
+            uri: "vcontext://plans/current",
             name: "Current Plan",
             mimeType: "text/x-tron",
           },
           {
-            uri: "vagenda://playbook",
+            uri: "vcontext://playbook",
             name: "Project Playbook",
             mimeType: "text/x-tron",
           },
@@ -546,7 +546,7 @@ class VAgendaMCPServer {
       async () => ({
         tools: [
           {
-            name: "vagenda_create_todo",
+            name: "vcontext_create_todo",
             description: "Create a new todo item",
             inputSchema: {
               type: "object",
@@ -562,7 +562,7 @@ class VAgendaMCPServer {
             },
           },
           {
-            name: "vagenda_update_todo",
+            name: "vcontext_update_todo",
             description: "Update a todo item",
             inputSchema: {
               type: "object",
@@ -586,9 +586,9 @@ class VAgendaMCPServer {
         const { name, arguments: args } = request.params;
         
         switch (name) {
-          case "vagenda_create_todo":
+          case "vcontext_create_todo":
             return await this.createTodo(args);
-          case "vagenda_update_todo":
+          case "vcontext_update_todo":
             return await this.updateTodo(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -625,7 +625,7 @@ class VAgendaMCPServer {
     await this.saveTodoList(todoList);
     
     // Send notification to subscribers
-    await this.notifyResourceChanged("vagenda://todos/current");
+    await this.notifyResourceChanged("vcontext://todos/current");
     
     return {
       content: [
@@ -657,7 +657,7 @@ server.run().catch(console.error);
 
 ### Client Usage
 
-AI agents connect to vAgenda MCP server:
+AI agents connect to vContext MCP server:
 
 ```typescript
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -665,7 +665,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 
 // Create client
 const transport = new StdioClientTransport({
-  command: "vagenda-mcp-server",
+  command: "vcontext-mcp-server",
   args: ["--project", "/path/to/project"],
 });
 
@@ -687,7 +687,7 @@ const response = await client.request(
   {
     method: "resources/read",
     params: {
-      uri: "vagenda://todos/current",
+      uri: "vcontext://todos/current",
     },
   },
   ReadResourceResultSchema
@@ -700,7 +700,7 @@ await client.request(
   {
     method: "tools/call",
     params: {
-      name: "vagenda_create_todo",
+      name: "vcontext_create_todo",
       arguments: {
         title: "Fix authentication bug",
         status: "pending",
@@ -721,14 +721,14 @@ class FileBackend {
   
   async readTodos(): Promise<string> {
     return fs.readFile(
-      path.join(this.rootPath, "vAgenda", "current.tron"),
+      path.join(this.rootPath, "vContext", "current.tron"),
       "utf-8"
     );
   }
   
   async writeTodos(content: string): Promise<void> {
     await fs.writeFile(
-      path.join(this.rootPath, "vAgenda", "current.tron"),
+      path.join(this.rootPath, "vContext", "current.tron"),
       content
     );
   }
@@ -743,18 +743,18 @@ class DatabaseBackend {
   
   async readTodos(): Promise<string> {
     const row = await this.db.get(
-      "SELECT content FROM vagenda_documents WHERE uri = ?",
-      "vagenda://todos/current"
+      "SELECT content FROM vcontext_documents WHERE uri = ?",
+      "vcontext://todos/current"
     );
     return row.content;
   }
   
   async writeTodos(content: string): Promise<void> {
     await this.db.run(
-      "UPDATE vagenda_documents SET content = ?, updated_at = ? WHERE uri = ?",
+      "UPDATE vcontext_documents SET content = ?, updated_at = ? WHERE uri = ?",
       content,
       Date.now(),
-      "vagenda://todos/current"
+      "vcontext://todos/current"
     );
   }
 }
@@ -768,7 +768,7 @@ Best for: Single-user, local development
 
 ```bash
 # Start server
-vagenda-mcp-server --project ~/Projects/myapp
+vcontext-mcp-server --project ~/Projects/myapp
 
 # Client connects via stdin/stdout
 ```
@@ -789,7 +789,7 @@ Best for: Multi-user, distributed systems
 
 ```typescript
 const transport = new HTTPClientTransport(
-  new URL("https://vagenda.example.com/mcp")
+  new URL("https://vcontext.example.com/mcp")
 );
 ```
 
@@ -855,7 +855,7 @@ Handle concurrent modifications:
 ```typescript
 // Use Extension 10 (Version Control) sequence numbers
 interface VAgendaDocument {
-  vAgendaInfo: {
+  vContextInfo: {
     version: string;
     sequence: number;        // Increment on each modification
   };
@@ -868,11 +868,11 @@ class ConcurrencySafeServer extends VAgendaMCPServer {
     const currentSeq = args.expectedSequence;
     const doc = await this.loadDocument();
     
-    if (doc.vAgendaInfo.sequence !== currentSeq) {
+    if (doc.vContextInfo.sequence !== currentSeq) {
       return {
         content: [{
           type: "text",
-          text: `Conflict: document was modified (expected seq ${currentSeq}, actual ${doc.vAgendaInfo.sequence})`
+          text: `Conflict: document was modified (expected seq ${currentSeq}, actual ${doc.vContextInfo.sequence})`
         }],
         isError: true
       };
@@ -880,7 +880,7 @@ class ConcurrencySafeServer extends VAgendaMCPServer {
     
     // Perform update
     // ...
-    doc.vAgendaInfo.sequence++;
+    doc.vContextInfo.sequence++;
     await this.saveDocument(doc);
     
     return { content: [{ type: "text", text: "Success" }], isError: false };
@@ -920,7 +920,7 @@ Clients can request TRON or JSON format:
 ```typescript
 // Client specifies preferred format via Accept-like mechanism
 const response = await client.readResource({
-  uri: "vagenda://todos/current",
+  uri: "vcontext://todos/current",
   // Custom parameter (not in MCP spec, but could be added)
   format: "json"  // or "tron"
 });
@@ -949,7 +949,7 @@ Server pushes updates to subscribed clients:
 await client.request({
   method: "resources/subscribe",
   params: {
-    uri: "vagenda://todos/current"
+    uri: "vcontext://todos/current"
   }
 });
 
@@ -957,7 +957,7 @@ await client.request({
 server.sendNotification({
   method: "notifications/resources/updated",
   params: {
-    uri: "vagenda://todos/current"
+    uri: "vcontext://todos/current"
   }
 });
 
@@ -975,19 +975,19 @@ client.setNotificationHandler(
 
 ## Relationship to Existing Extensions
 
-### Claude Extension (vAgenda-extension-claude.md)
+### Claude Extension (vContext-extension-claude.md)
 
 The Claude extension mentioned MCP briefly but didn't define the protocol. This extension provides:
 - Full MCP resource/tool definitions that Claude extension referenced
 - Server implementation that Claude clients can connect to
-- Standard way for Claude to access vAgenda (vs custom file reading)
+- Standard way for Claude to access vContext (vs custom file reading)
 
-### Beads Extension (vAgenda-extension-beads.md)
+### Beads Extension (vContext-extension-beads.md)
 
 Beads currently uses file-based sync. With MCP:
 - Beads could expose its data via MCP server
-- vAgenda MCP server could import/export Beads format
-- Real-time sync between Beads and vAgenda via MCP notifications
+- vContext MCP server could import/export Beads format
+- Real-time sync between Beads and vContext via MCP notifications
 
 ### Extension 10 (Version Control)
 
@@ -998,7 +998,7 @@ MCP operations should generate version control events:
 
 ### Extension 11 (Multi-Agent Forking)
 
-When multiple agents access vAgenda via MCP:
+When multiple agents access vContext via MCP:
 - Each agent can fork for independent exploration
 - MCP tools for creating/merging forks
 - Notification mechanism for fork events
@@ -1006,18 +1006,18 @@ When multiple agents access vAgenda via MCP:
 ### Extension 12 (Playbooks)
 
 MCP makes playbooks accessible:
-- `vagenda://playbook` resource for reading learnings
-- `vagenda_add_learning` tool for accumulating knowledge
-- `vagenda_query_playbook` tool for semantic search
+- `vcontext://playbook` resource for reading learnings
+- `vcontext_add_learning` tool for accumulating knowledge
+- `vcontext_query_playbook` tool for semantic search
 - Agents automatically build institutional memory via MCP
 
 ## Complete Tool Schema Definitions
 
-### vagenda_create_todo
+### vcontext_create_todo
 
 ```json
 {
-  "name": "vagenda_create_todo",
+  "name": "vcontext_create_todo",
   "description": "Create a new todo item in the current or specified TodoList",
   "inputSchema": {
     "type": "object",
@@ -1055,11 +1055,11 @@ MCP makes playbooks accessible:
 }
 ```
 
-### vagenda_update_todo
+### vcontext_update_todo
 
 ```json
 {
-  "name": "vagenda_update_todo",
+  "name": "vcontext_update_todo",
   "description": "Update an existing todo item",
   "inputSchema": {
     "type": "object",
@@ -1095,11 +1095,11 @@ MCP makes playbooks accessible:
 }
 ```
 
-### vagenda_create_plan
+### vcontext_create_plan
 
 ```json
 {
-  "name": "vagenda_create_plan",
+  "name": "vcontext_create_plan",
   "description": "Create a new implementation plan",
   "inputSchema": {
     "type": "object",
@@ -1148,11 +1148,11 @@ MCP makes playbooks accessible:
 }
 ```
 
-### vagenda_add_learning
+### vcontext_add_learning
 
 ```json
 {
-  "name": "vagenda_add_learning",
+  "name": "vcontext_add_learning",
   "description": "Add a learning to the playbook (requires Extension 12)",
   "inputSchema": {
     "type": "object",
@@ -1185,11 +1185,11 @@ MCP makes playbooks accessible:
 }
 ```
 
-### vagenda_query_playbook
+### vcontext_query_playbook
 
 ```json
 {
-  "name": "vagenda_query_playbook",
+  "name": "vcontext_query_playbook",
   "description": "Search the playbook for relevant learnings (requires Extension 12)",
   "inputSchema": {
     "type": "object",
@@ -1223,9 +1223,9 @@ MCP makes playbooks accessible:
 ### Example 1: Complete MCP Server Session
 
 ```bash
-# Terminal 1: Start vAgenda MCP server
-$ vagenda-mcp-server --project ~/Projects/myapp
-[INFO] vAgenda MCP Server v0.1.0
+# Terminal 1: Start vContext MCP server
+$ vcontext-mcp-server --project ~/Projects/myapp
+[INFO] vContext MCP Server v0.1.0
 [INFO] Project: /Users/me/Projects/myapp
 [INFO] Listening on stdio
 ```
@@ -1238,7 +1238,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 async function main() {
   // Connect to server
   const transport = new StdioClientTransport({
-    command: "vagenda-mcp-server",
+    command: "vcontext-mcp-server",
     args: ["--project", "~/Projects/myapp"],
   });
   
@@ -1248,7 +1248,7 @@ async function main() {
   );
   
   await client.connect(transport);
-  console.log("Connected to vAgenda MCP server");
+  console.log("Connected to vContext MCP server");
   
   // List resources
   const resources = await client.request({
@@ -1259,7 +1259,7 @@ async function main() {
   // Read current todos
   const todosResponse = await client.request({
     method: "resources/read",
-    params: { uri: "vagenda://todos/current" },
+    params: { uri: "vcontext://todos/current" },
   });
   console.log("Current todos:");
   console.log(todosResponse.contents[0].text);
@@ -1268,7 +1268,7 @@ async function main() {
   const createResponse = await client.request({
     method: "tools/call",
     params: {
-      name: "vagenda_create_todo",
+      name: "vcontext_create_todo",
       arguments: {
         title: "Add MCP integration tests",
         description: "Write comprehensive tests for MCP server",
@@ -1283,7 +1283,7 @@ async function main() {
   const updateResponse = await client.request({
     method: "tools/call",
     params: {
-      name: "vagenda_update_todo",
+      name: "vcontext_update_todo",
       arguments: {
         id: "todo-abc123",
         status: "inProgress",
@@ -1297,7 +1297,7 @@ async function main() {
   await client.request({
     method: "tools/call",
     params: {
-      name: "vagenda_add_learning",
+      name: "vcontext_add_learning",
       arguments: {
         category: "patterns",
         title: "MCP server stdio transport pattern",
@@ -1319,29 +1319,29 @@ main().catch(console.error);
 // ~/Library/Application Support/Claude/claude_desktop_config.json
 {
   "mcpServers": {
-    "vagenda": {
+    "vcontext": {
       "command": "npx",
       "args": [
         "-y",
-        "@vagenda/mcp-server",
+        "@vcontext/mcp-server",
         "--project",
         "/Users/me/Projects/myapp"
       ],
       "env": {
-        "VAGENDA_FORMAT": "tron"
+        "VCONTEXT_FORMAT": "tron"
       }
     }
   }
 }
 ```
 
-When Claude Desktop starts, it automatically connects to the vAgenda MCP server. Now Claude can:
+When Claude Desktop starts, it automatically connects to the vContext MCP server. Now Claude can:
 
 ```
 User: What tasks do I have pending?
 
-Claude: Let me check your current vAgenda tasks.
-[calls resources/read on vagenda://todos/current]
+Claude: Let me check your current vContext tasks.
+[calls resources/read on vcontext://todos/current]
 
 You have 3 pending tasks:
 1. "Add MCP integration tests" - High priority
@@ -1355,7 +1355,7 @@ Would you like me to help with any of these?
 User: Start working on the MCP integration tests
 
 Claude: I'll mark that task as in progress and begin working on it.
-[calls tools/call with vagenda_update_todo]
+[calls tools/call with vcontext_update_todo]
 
 Updated task status to inProgress. Let me review the current codebase...
 [continues with implementation]
@@ -1364,7 +1364,7 @@ Updated task status to inProgress. Let me review the current codebase...
 ### Example 3: Aider Integration
 
 ```python
-# aider_vagenda.py - Aider plugin for vAgenda MCP
+# aider_vcontext.py - Aider plugin for vContext MCP
 from mcp import Client, StdioClientTransport
 
 class VAgendaIntegration:
@@ -1374,7 +1374,7 @@ class VAgendaIntegration:
             {"capabilities": {}}
         )
         self.transport = StdioClientTransport(
-            command="vagenda-mcp-server",
+            command="vcontext-mcp-server",
             args=["--project", project_path]
         )
     
@@ -1384,17 +1384,17 @@ class VAgendaIntegration:
         # Read current context
         response = await self.client.request({
             "method": "resources/read",
-            "params": {"uri": "vagenda://todos/current"}
+            "params": {"uri": "vcontext://todos/current"}
         })
         
         todos_content = response["contents"][0]["text"]
-        return f"Current vAgenda context:\n{todos_content}"
+        return f"Current vContext context:\n{todos_content}"
     
     async def complete_task(self, task_id):
         await self.client.request({
             "method": "tools/call",
             "params": {
-                "name": "vagenda_update_todo",
+                "name": "vcontext_update_todo",
                 "arguments": {
                     "id": task_id,
                     "status": "completed"
@@ -1406,7 +1406,7 @@ class VAgendaIntegration:
         await self.client.request({
             "method": "tools/call",
             "params": {
-                "name": "vagenda_add_learning",
+                "name": "vcontext_add_learning",
                 "arguments": {
                     "category": category,
                     "title": title,
@@ -1416,9 +1416,9 @@ class VAgendaIntegration:
         })
 
 # Usage in Aider
-vagenda = VAgendaIntegration("/path/to/project")
-await vagenda.start_session()
-# Aider now has full vAgenda context
+vcontext = VAgendaIntegration("/path/to/project")
+await vcontext.start_session()
+# Aider now has full vContext context
 ```
 
 ### Example 4: Multi-Agent Coordination
@@ -1433,7 +1433,7 @@ await agentA.connect(...);
 await agentA.request({
   method: "tools/call",
   params: {
-    name: "vagenda_create_todo",
+    name: "vcontext_create_todo",
     arguments: {
       title: "Implement OAuth login",
       status: "inProgress",
@@ -1450,11 +1450,11 @@ await agentB.connect(...);
 await agentB.setNotificationHandler(
   "notifications/resources/updated",
   async (params) => {
-    if (params.uri === "vagenda://todos/current") {
+    if (params.uri === "vcontext://todos/current") {
       console.log("Tasks updated, checking for review work...");
       const todos = await agentB.request({
         method: "resources/read",
-        params: { uri: "vagenda://todos/current" }
+        params: { uri: "vcontext://todos/current" }
       });
       // Agent B sees Agent A's work and can review
     }
@@ -1465,7 +1465,7 @@ await agentB.setNotificationHandler(
 await agentA.request({
   method: "tools/call",
   params: {
-    name: "vagenda_update_todo",
+    name: "vcontext_update_todo",
     arguments: {
       id: "todo-oauth",
       status: "completed"
@@ -1477,7 +1477,7 @@ await agentA.request({
 await agentB.request({
   method: "tools/call",
   params: {
-    name: "vagenda_create_todo",
+    name: "vcontext_create_todo",
     arguments: {
       title: "Review OAuth implementation",
       assignee: "agent-b",
@@ -1498,7 +1498,7 @@ await agentB.request({
 - File-based backend
 
 **Deliverables**:
-- `vagenda-mcp-server` npm package
+- `vcontext-mcp-server` npm package
 - Basic documentation
 - Example integrations for Claude Desktop
 
@@ -1557,16 +1557,16 @@ await agentB.request({
 - A: Paginate results (multiple requests)
 - B: Compress content (gzip)
 - C: Return summaries with links to full content
-- D: Split into smaller resources (e.g., `vagenda://playbook/strategies`)
+- D: Split into smaller resources (e.g., `vcontext://playbook/strategies`)
 
 **Recommendation**: Option D + C. Split playbook into category-specific resources, provide summary resource with links.
 
 ### 3. Server Scope
 
-**Question**: Should vAgenda MCP server be mandatory or optional?
+**Question**: Should vContext MCP server be mandatory or optional?
 
 **Options**:
-- A: Mandatory - all vAgenda tools must use MCP
+- A: Mandatory - all vContext tools must use MCP
 - B: Optional - file-based and MCP both supported
 - C: Recommended - MCP preferred but not required
 
@@ -1589,15 +1589,15 @@ await agentB.request({
 We're seeking feedback on:
 
 1. **Transport priorities**: Which transports are most important? (stdio, SSE, HTTP)
-2. **Multi-project support**: Should one MCP server handle multiple vAgenda projects?
+2. **Multi-project support**: Should one MCP server handle multiple vContext projects?
 3. **Permission model**: What permission granularity makes sense?
 4. **Tool set**: Are there additional MCP tools we should include?
-5. **Discovery**: How should clients discover vAgenda MCP servers?
-6. **Interop**: Should vAgenda MCP server support other formats (Beads, markdown)?
+5. **Discovery**: How should clients discover vContext MCP servers?
+6. **Interop**: Should vContext MCP server support other formats (Beads, markdown)?
 
 Please provide feedback via:
-- GitHub issues: https://github.com/visionik/vAgenda/issues
-- GitHub discussions: https://github.com/visionik/vAgenda/discussions
+- GitHub issues: https://github.com/visionik/vContext/issues
+- GitHub discussions: https://github.com/visionik/vContext/discussions
 - Email: visionik@pobox.com
 
 ## References
@@ -1605,9 +1605,9 @@ Please provide feedback via:
 - **MCP Specification**: https://modelcontextprotocol.io
 - **MCP TypeScript SDK**: https://github.com/modelcontextprotocol/typescript-sdk
 - **MCP Python SDK**: https://github.com/modelcontextprotocol/python-sdk
-- **vAgenda Core Specification**: SPEC-v2.md
-- **vAgenda Claude Extension**: vAgenda-extension-claude.md
-- **vAgenda Beads Extension**: vAgenda-extension-beads.md
+- **vContext Core Specification**: SPEC-v2.md
+- **vContext Claude Extension**: vContext-extension-claude.md
+- **vContext Beads Extension**: vContext-extension-beads.md
 - **Claude Desktop MCP Setup**: https://modelcontextprotocol.io/quickstart/user
 
 ## Appendix: MCP Protocol Basics
@@ -1619,7 +1619,7 @@ For those unfamiliar with MCP, here's a quick primer:
 ```
 ┌─────────────────┐         ┌──────────────────┐
 │   AI Client     │◄───────►│   MCP Server     │
-│  (Claude, etc)  │   MCP   │  (vAgenda, etc)  │
+│  (Claude, etc)  │   MCP   │  (vContext, etc)  │
 └─────────────────┘ Protocol└──────────────────┘
                                │
                                ▼
@@ -1632,17 +1632,17 @@ For those unfamiliar with MCP, here's a quick primer:
 ### Core MCP Concepts
 
 **Resources**: Read-only data endpoints
-- Example: `vagenda://todos/current`
+- Example: `vcontext://todos/current`
 - Accessed via `resources/read`
 - Can be files, API responses, database queries
 
 **Tools**: Operations that modify state
-- Example: `vagenda_create_todo`
+- Example: `vcontext_create_todo`
 - Invoked via `tools/call`
 - Can have side effects
 
 **Prompts**: Pre-defined templates
-- Example: `vagenda_session_start`
+- Example: `vcontext_session_start`
 - Help AI agents use the system correctly
 
 ### MCP Request/Response Flow
@@ -1654,15 +1654,15 @@ Client                          Server
   │◄──────list of resources───────┤
   │                               │
   ├──────resources/read ─────────►│
-  │      (uri: vagenda://todos)   │
+  │      (uri: vcontext://todos)   │
   │◄──────TRON content ───────────┤
   │                               │
   ├──────tools/call ─────────────►│
-  │      (name: vagenda_create_todo)
+  │      (name: vcontext_create_todo)
   │◄──────success response────────┤
   │                               │
   ◄──notifications/resources/updated─
-         (uri: vagenda://todos)
+         (uri: vcontext://todos)
 ```
 
-This extension leverages MCP's standardized protocol to make vAgenda universally accessible to AI agents.
+This extension leverages MCP's standardized protocol to make vContext universally accessible to AI agents.

@@ -1,11 +1,11 @@
-// Package validator provides validation logic for vAgenda documents.
+// Package validator provides validation logic for vContext documents.
 package validator
 
 import (
 	"errors"
 	"fmt"
 
-	"github.com/visionik/vAgenda/api/go/pkg/core"
+	"github.com/visionik/vContext/api/go/pkg/core"
 )
 
 var (
@@ -39,7 +39,7 @@ func (e ValidationErrors) Error() string {
 	return result
 }
 
-// Validator validates vAgenda documents.
+// Validator validates vContext documents.
 type Validator interface {
 	// Validate checks if a document is valid.
 	Validate(doc *core.Document) error
@@ -73,7 +73,7 @@ func (v *validator) Validate(doc *core.Document) error {
 	// Validate Info
 	if doc.Info.Version == "" {
 		errors = append(errors, ValidationError{
-			Field:   "vAgendaInfo.version",
+			Field:   "vContextInfo.version",
 			Message: "version is required",
 		})
 	}

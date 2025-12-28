@@ -1,4 +1,4 @@
-# vAgenda Extension: Beads Interoperability
+# vContext Extension: Beads Interoperability
 
 **Extension Name**: Beads Interop  
 **Version**: 0.2  
@@ -12,7 +12,7 @@
 
 [Beads](https://github.com/steveyegge/beads) is a git-backed issue tracker created by Steve Yegge that provides persistent, structured memory for coding agents. It stores dependency-aware task graphs in `.beads/` as JSONL, allowing agents to handle long-horizon tasks without losing context between sessions. Beads focuses on \"what matters right now\" - current work, what just finished, and what's blocked.
 
-This extension enables bidirectional interoperability between vAgenda and Beads by **extending existing vAgenda classes** rather than creating new types.
+This extension enables bidirectional interoperability between vContext and Beads by **extending existing vContext classes** rather than creating new types.
 
 ## Motivation
 
@@ -23,19 +23,19 @@ This extension enables bidirectional interoperability between vAgenda and Beads 
 - Git-based storage with automatic sync
 - Focus on current work
 
-**vAgenda strengths**:
+**vContext strengths**:
 - Standardized format for cross-system interop
 - Rich narratives for plans (the \"why\" and \"how\")
 - Long-term memory via Playbooks
 - Token-efficient TRON encoding
 - Three-tier memory separation
 
-**Integration goal**: Let Beads handle execution tracking while vAgenda provides knowledge persistence, transfer, and cross-project learning.
+**Integration goal**: Let Beads handle execution tracking while vContext provides knowledge persistence, transfer, and cross-project learning.
 
 ## Dependencies
 
 **Required**:
-- vAgenda Core (TodoList, TodoItem, Plan, PlanItem)
+- vContext Core (TodoList, TodoItem, Plan, PlanItem)
 - Extension 2 (Identifiers) - for Beads ID mapping
 - Extension 4 (Hierarchical) - for dependency tracking
 
@@ -47,13 +47,13 @@ This extension enables bidirectional interoperability between vAgenda and Beads 
 
 ## Design Principle: Extend Existing Classes
 
-Rather than creating `BeadsIssue` or `BeadsProject` types, we extend existing vAgenda classes with Beads-specific fields:
+Rather than creating `BeadsIssue` or `BeadsProject` types, we extend existing vContext classes with Beads-specific fields:
 
 - **TodoItem** ↔ Beads issue (with `beadsId`, `beadsMetrics`)
 - **Plan** tracks Beads sync state (with `beadsSyncedAt`)
 - **PlaybookItem** captures learnings from Beads execution
 
-This maintains vAgenda's simplicity while enabling rich Beads integration.
+This maintains vContext's simplicity while enabling rich Beads integration.
 
 ---
 
@@ -150,7 +150,7 @@ PlaybookItem {
 ### Status Mapping: TodoItem ↔ Beads Issue
 
 ```
-vAgenda Status    →  Beads Status
+vContext Status    →  Beads Status
 -------------------------------------
 pending           →  open
 inProgress        →  open (with recent activity)
@@ -161,7 +161,7 @@ cancelled         →  closed (with cancellation note)
 
 ### Dependency Mapping
 
-vAgenda's Extension 4 `dependencies` field maps directly:
+vContext's Extension 4 `dependencies` field maps directly:
 
 ```javascript
 TodoItem {
@@ -201,13 +201,13 @@ These metrics help prioritize work without requiring separate types.
 
 ### Pattern 1: Session Handoff
 
-**End of agent session** (Beads → vAgenda):
+**End of agent session** (Beads → vContext):
 
 ```bash
 # Agent exports current state
-bd export --format=vagenda > session-handoff.json
+bd export --format=vcontext > session-handoff.json
 
-# Creates vAgenda TodoList with:
+# Creates vContext TodoList with:
 # - Current beads as TodoItems (with beadsId)
 # - Dependencies preserved
 # - Graph metrics for prioritization
@@ -216,7 +216,7 @@ bd export --format=vagenda > session-handoff.json
 Example output:
 ```json
 {
-  "vAgendaInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.3"},
   "todoList": {
     "id": "session-2025-12-27",
     "beadsProject": ".beads",
@@ -249,16 +249,16 @@ Example output:
 }
 ```
 
-**Start of next session** (vAgenda → Beads):
+**Start of next session** (vContext → Beads):
 
 ```bash
 # Import updated priorities/context
-bd import --format=vagenda session-handoff.json
+bd import --format=vcontext session-handoff.json
 
 # Beads sees:
 # - New items added by human during planning
 # - Updated priorities
-# - Context from vAgenda descriptions
+# - Context from vContext descriptions
 ```
 
 ### Pattern 2: Plan-Driven Execution
@@ -267,7 +267,7 @@ bd import --format=vagenda session-handoff.json
 
 ```json
 {
-  "vAgendaInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.3"},
   "plan": {
     "id": "auth-plan",
     "title": "Add OAuth2 Support",
@@ -312,7 +312,7 @@ bd import --format=vagenda session-handoff.json
 
 Agent imports into Beads:
 ```bash
-bd import --format=vagenda auth-plan.json
+bd import --format=vcontext auth-plan.json
 
 # Creates Beads issues:
 # bd-1: Configure OAuth provider
@@ -320,9 +320,9 @@ bd import --format=vagenda auth-plan.json
 # bd-3: Test OAuth login (depends: bd-2)
 ```
 
-As execution progresses, agent exports back to vAgenda:
+As execution progresses, agent exports back to vContext:
 ```bash
-bd export --format=vagenda > auth-execution.json
+bd export --format=vcontext > auth-execution.json
 
 # Updates Plan with:
 # - PlanItem status changes
@@ -336,13 +336,13 @@ bd export --format=vagenda > auth-execution.json
 
 ```bash
 # Export completed work
-bd export --format=vagenda --closed-since=7d > week-retro.json
+bd export --format=vcontext --closed-since=7d > week-retro.json
 ```
 
 Human or agent reviews and creates PlaybookItem:
 ```json
 {
-  "vAgendaInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.3"},
   "playbook": {
     "id": "backend-playbook",
     "items": [
@@ -387,9 +387,9 @@ Human or agent reviews and creates PlaybookItem:
 Accumulate learnings across projects:
 
 ```
-Project A (Beads) → vAgenda Playbook
-Project B (Beads) → vAgenda Playbook  → Unified knowledge base
-Project C (Beads) → vAgenda Playbook
+Project A (Beads) → vContext Playbook
+Project B (Beads) → vContext Playbook  → Unified knowledge base
+Project C (Beads) → vContext Playbook
 ```
 
 Each project's completed Beads issues feed PlaybookItems. Over time, the Playbook captures:
@@ -404,12 +404,12 @@ Each project's completed Beads issues feed PlaybookItems. Over time, the Playboo
 
 ### For Beads Developers
 
-Add vAgenda export to `bd export`:
+Add vContext export to `bd export`:
 
 ```go
 // In bd export command
-case "vagenda":
-    exporter := vagenda.NewExporter(db)
+case "vcontext":
+    exporter := vcontext.NewExporter(db)
     if *closedSince != "" {
         return exporter.ExportPlan(filter, closedSince)
     }
@@ -419,7 +419,7 @@ case "vagenda":
 **Minimal TodoList export**:
 ```json
 {
-  "vAgendaInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.3"},
   "todoList": {
     "items": [
       {
@@ -446,7 +446,7 @@ case "vagenda":
 **With metrics** (requires `beads_viewer`):
 ```json
 {
-  "vAgendaInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.3"},
   "todoList": {
     "items": [
       {
@@ -466,7 +466,7 @@ case "vagenda":
 }
 ```
 
-### For vAgenda Tools
+### For vContext Tools
 
 Recognize Beads integration:
 
@@ -491,7 +491,7 @@ if (item.beadsSource) {
 
 ### Extension 2: Identifiers
 - `beadsId` serves as external identifier linking to Beads
-- TodoItem `id` remains vAgenda's internal identifier
+- TodoItem `id` remains vContext's internal identifier
 
 ### Extension 4: Hierarchical Structures
 - `dependencies` array maps directly to Beads dependency graph
@@ -513,7 +513,7 @@ if (item.beadsSource) {
 
 ### Extension 10: Version Control & Sync
 - `beadsSyncedAt` indicates last Beads sync
-- `changeLog` tracks vAgenda document changes
+- `changeLog` tracks vContext document changes
 - Complementary: Beads tracks execution, Extension 10 tracks document evolution
 
 ### Extension 12: Playbooks
@@ -528,25 +528,25 @@ if (item.beadsSource) {
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Human Planning                         │
-│  vAgenda Plan with narratives, approach, constraints        │
+│  vContext Plan with narratives, approach, constraints        │
 └──────────────────────┬──────────────────────────────────────┘
                        │
-                       ↓ bd import --format=vagenda
+                       ↓ bd import --format=vcontext
 ┌─────────────────────────────────────────────────────────────┐
 │                    Agent Execution (Beads)                  │
 │  Task tracking, dependency resolution, bottleneck detection │
 └──────────────────────┬──────────────────────────────────────┘
                        │
-                       ↓ bd export --format=vagenda
+                       ↓ bd export --format=vcontext
 ┌─────────────────────────────────────────────────────────────┐
 │                     Session Handoff                         │
-│  vAgenda TodoList with beadsId, metrics, current state      │
+│  vContext TodoList with beadsId, metrics, current state      │
 └──────────────────────┬──────────────────────────────────────┘
                        │
                        ↓ After completion
 ┌─────────────────────────────────────────────────────────────┐
 │                   Knowledge Extraction                      │
-│  vAgenda Playbook with learnings, evidence from Beads       │
+│  vContext Playbook with learnings, evidence from Beads       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -556,26 +556,26 @@ if (item.beadsSource) {
 
 1. **No new top-level types** - Uses existing TodoList/Plan/Playbook structure
 2. **Simple integration** - Just add `beadsId`, `beadsMetrics`, `beadsSyncedAt` fields
-3. **Bidirectional sync** - Beads ↔ vAgenda in both directions
-4. **Preserves strengths** - Beads handles execution, vAgenda handles knowledge
+3. **Bidirectional sync** - Beads ↔ vContext in both directions
+4. **Preserves strengths** - Beads handles execution, vContext handles knowledge
 5. **Cross-project learning** - Playbooks accumulate insights across Beads projects
 
 ---
 
 ## Open Questions
 
-1. **Should Beads native format adopt vAgenda?**
-   - **Proposal**: Beads keeps JSONL (optimized for agent access), adds vAgenda as export/import
+1. **Should Beads native format adopt vContext?**
+   - **Proposal**: Beads keeps JSONL (optimized for agent access), adds vContext as export/import
    
 2. **How to handle Beads' memory decay?**
    - Beads compacts old issues to save context
-   - vAgenda Plans preserve full history
-   - **Proposal**: Beads compacts for agents, vAgenda archives for humans
+   - vContext Plans preserve full history
+   - **Proposal**: Beads compacts for agents, vContext archives for humans
 
 3. **Multi-agent coordination?**
    - Beads uses git for sync
-   - vAgenda Extension 11 (Forking) handles parallel work
-   - **Proposal**: Beads for real-time coordination, vAgenda for merge/conflict resolution
+   - vContext Extension 11 (Forking) handles parallel work
+   - **Proposal**: Beads for real-time coordination, vContext for merge/conflict resolution
 
 4. **URI scheme for Beads issues?**
    - `beads://bd-a1b2` or `beads://.beads/bd-a1b2`?
@@ -585,20 +585,20 @@ if (item.beadsSource) {
 
 ## Migration Path
 
-**Phase 1**: Export only (Beads → vAgenda)
-- Add `bd export --format=vagenda`
-- Agents can archive to vAgenda
+**Phase 1**: Export only (Beads → vContext)
+- Add `bd export --format=vcontext`
+- Agents can archive to vContext
 - No breaking changes
 
-**Phase 2**: Import support (vAgenda → Beads)
-- Add `bd import --format=vagenda`
+**Phase 2**: Import support (vContext → Beads)
+- Add `bd import --format=vcontext`
 - Enable planning → execution workflow
 - Still no breaking changes
 
 **Phase 3**: Bidirectional sync
-- Real-time sync between Beads and vAgenda
-- vAgenda tools can query live Beads state
-- beads_viewer renders vAgenda Plans
+- Real-time sync between Beads and vContext
+- vContext tools can query live Beads state
+- beads_viewer renders vContext Plans
 
 ---
 
@@ -608,11 +608,11 @@ if (item.beadsSource) {
 
 **TRON**:
 ```tron
-class vAgendaInfo: version
+class vContextInfo: version
 class TodoList: id, items, beadsProject, beadsSyncedAt
 class TodoItem: id, title, status, beadsId, dependencies
 
-vAgendaInfo: vAgendaInfo("0.3")
+vContextInfo: vContextInfo("0.3")
 todoList: TodoList(
   "session-001",
   [
@@ -629,7 +629,7 @@ todoList: TodoList(
 **JSON**:
 ```json
 {
-  "vAgendaInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.3"},
   "todoList": {
     "id": "session-002",
     "beadsProject": ".beads",
@@ -670,7 +670,7 @@ todoList: TodoList(
 **JSON**:
 ```json
 {
-  "vAgendaInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.3"},
   "playbook": {
     "id": "backend-patterns",
     "title": "Backend Development Patterns",
@@ -720,11 +720,11 @@ todoList: TodoList(
 
 ## References
 
-- **vAgenda Core Specification v0.3**: README.md
+- **vContext Core Specification v0.3**: README.md
 - **Extension 2 (Identifiers)**: README.md#extension-2-identifiers
 - **Extension 4 (Hierarchical)**: README.md#extension-4-hierarchical
 - **Extension 10 (Version Control)**: README.md#extension-10-version-control
-- **Extension 12 (Playbooks)**: vAgenda-extension-playbooks.md
+- **Extension 12 (Playbooks)**: vContext-extension-playbooks.md
 - **Beads**: https://github.com/steveyegge/beads
 - **beads_viewer**: https://github.com/Dicklesworthstone/beads_viewer
 - **Steve Yegge's article**: https://steve-yegge.medium.com/introducing-beads-a-coding-agent-memory-system-637d7d92514a
@@ -740,7 +740,7 @@ This specification is released under CC BY 4.0.
 ## Changelog
 
 ### Version 0.2 (2025-12-27)
-- Updated to vAgenda v0.3 spec
+- Updated to vContext v0.3 spec
 - Simplified to extend existing classes (no new top-level types)
 - `beadsMetrics` embedded in TodoItem (not separate type)
 - `beadsSyncedAt` on TodoList and Plan (not separate sync type)

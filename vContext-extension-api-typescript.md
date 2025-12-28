@@ -1,4 +1,4 @@
-# vAgenda Extension Proposal: TypeScript/JavaScript API Library
+# vContext Extension Proposal: TypeScript/JavaScript API Library
 
 > **EARLY DRAFT**: This is an initial proposal and subject to change. Comments, feedback, and suggestions are strongly encouraged. Please provide input via GitHub issues or discussions.
 
@@ -10,7 +10,7 @@
 
 ## Overview
 
-This document describes a TypeScript library implementation for working with vAgenda documents. The library provides type-safe interfaces for creating, parsing, manipulating, and validating vAgenda TodoLists and Plans in both JSON and TRON formats, with full JavaScript interoperability.
+This document describes a TypeScript library implementation for working with vContext documents. The library provides type-safe interfaces for creating, parsing, manipulating, and validating vContext TodoLists and Plans in both JSON and TRON formats, with full JavaScript interoperability.
 
 The library enables:
 - **Type-safe operations** with full TypeScript support
@@ -32,10 +32,10 @@ The library enables:
 - Strong integration with modern frameworks
 
 **Use cases**:
-- Web-based vAgenda editors and viewers (React, Vue, Svelte)
+- Web-based vContext editors and viewers (React, Vue, Svelte)
 - Node.js agentic systems and task orchestrators
 - CLI tools with modern JS runtimes (Bun, Deno)
-- Browser extensions for vAgenda management
+- Browser extensions for vContext management
 - API servers (Express, Fastify, Hono)
 - Desktop apps (Electron, Tauri)
 - Mobile apps (React Native, Capacitor)
@@ -45,7 +45,7 @@ The library enables:
 ### Package Structure
 
 ```
-@vagenda/
+@vcontext/
 ├── core/                  # Core types and interfaces
 │   ├── src/
 │   │   ├── types.ts       # Core type definitions
@@ -132,10 +132,10 @@ The library enables:
 // types.ts
 
 /**
- * Root vAgenda document
+ * Root vContext document
  */
 export interface Document {
-  vAgendaInfo: Info;
+  vContextInfo: Info;
   todoList?: TodoList;
   plan?: Plan;
 }
@@ -235,7 +235,7 @@ export class VAgendaDocument {
    */
   static createTodoList(version: string = "0.2"): VAgendaDocument {
     return new VAgendaDocument({
-      vAgendaInfo: { version },
+      vContextInfo: { version },
       todoList: { items: [] }
     });
   }
@@ -248,7 +248,7 @@ export class VAgendaDocument {
     version: string = "0.2"
   ): VAgendaDocument {
     return new VAgendaDocument({
-      vAgendaInfo: { version },
+      vContextInfo: { version },
       plan: {
         title,
         status: "draft",
@@ -330,7 +330,7 @@ export class VAgendaDocument {
 
 export interface Parser {
   /**
-   * Parse a vAgenda document
+   * Parse a vContext document
    */
   parse(content: string): Document;
   
@@ -401,7 +401,7 @@ export class TodoListBuilder {
 
   constructor(version: string = "0.2") {
     this.doc = {
-      vAgendaInfo: { version },
+      vContextInfo: { version },
       todoList: { items: [] }
     };
   }
@@ -410,7 +410,7 @@ export class TodoListBuilder {
    * Set document author
    */
   author(name: string): this {
-    this.doc.vAgendaInfo.author = name;
+    this.doc.vContextInfo.author = name;
     return this;
   }
 
@@ -418,7 +418,7 @@ export class TodoListBuilder {
    * Set document description
    */
   description(desc: string): this {
-    this.doc.vAgendaInfo.description = desc;
+    this.doc.vContextInfo.description = desc;
     return this;
   }
 
@@ -460,7 +460,7 @@ export class PlanBuilder {
 
   constructor(title: string, version: string = "0.2") {
     this.doc = {
-      vAgendaInfo: { version },
+      vContextInfo: { version },
       plan: {
         title,
         status: "draft",
@@ -583,7 +583,7 @@ export const InfoSchema = z.object({
 });
 
 export const DocumentSchema = z.object({
-  vAgendaInfo: InfoSchema,
+  vContextInfo: InfoSchema,
   todoList: TodoListSchema.optional(),
   plan: PlanSchema.optional()
 });
@@ -728,7 +728,7 @@ The library supports document modification through multiple patterns: direct mut
 ```typescript
 // mutator/todo-mutator.ts
 
-import type { TodoList, TodoItem, ItemStatus } from "@vagenda/core";
+import type { TodoList, TodoItem, ItemStatus } from "@vcontext/core";
 
 /**
  * Helper functions for mutating TodoList
@@ -790,7 +790,7 @@ export class TodoListMutator {
 
 // mutator/plan-mutator.ts
 
-import type { Plan, Narrative, PlanStatus } from "@vagenda/core";
+import type { Plan, Narrative, PlanStatus } from "@vcontext/core";
 
 /**
  * Helper functions for mutating Plan
@@ -850,7 +850,7 @@ export function mutatePlan(plan: Plan): PlanMutator {
 ```typescript
 // updater/immutable.ts
 
-import type { Document, TodoList, TodoItem, Plan, Narrative, ItemStatus, PlanStatus } from "@vagenda/core";
+import type { Document, TodoList, TodoItem, Plan, Narrative, ItemStatus, PlanStatus } from "@vcontext/core";
 
 /**
  * Immutable update helpers using structural sharing
@@ -984,8 +984,8 @@ export class ImmutableUpdater {
 ```typescript
 // updater/validated.ts
 
-import type { Document, TodoItem, ItemStatus, PlanStatus, Narrative } from "@vagenda/core";
-import { Validator, type ValidationResult } from "@vagenda/validator";
+import type { Document, TodoItem, ItemStatus, PlanStatus, Narrative } from "@vcontext/core";
+import { Validator, type ValidationResult } from "@vcontext/validator";
 
 export interface UpdateResult {
   success: boolean;
@@ -1236,7 +1236,7 @@ Extensions use TypeScript declaration merging and module augmentation:
 ```typescript
 // extensions/identifiers/types.ts
 
-declare module "@vagenda/core" {
+declare module "@vcontext/core" {
   interface TodoList {
     id?: string;
   }
@@ -1256,7 +1256,7 @@ declare module "@vagenda/core" {
 
 // extensions/timestamps/types.ts
 
-declare module "@vagenda/core" {
+declare module "@vcontext/core" {
   interface Info {
     created?: string;
     updated?: string;
@@ -1273,7 +1273,7 @@ declare module "@vagenda/core" {
 
 export type Priority = "low" | "medium" | "high" | "critical";
 
-declare module "@vagenda/core" {
+declare module "@vcontext/core" {
   interface TodoList {
     title?: string;
     description?: string;
@@ -1294,7 +1294,7 @@ declare module "@vagenda/core" {
 ### Example 1: Creating a TodoList
 
 ```typescript
-import { todo } from "@vagenda/builder";
+import { todo } from "@vcontext/builder";
 
 const doc = todo("0.2")
   .author("agent-alpha")
@@ -1312,8 +1312,8 @@ console.log(doc.toTRON());
 ### Example 2: Parsing and Querying
 
 ```typescript
-import { VAgendaDocument } from "@vagenda/core";
-import { query } from "@vagenda/query";
+import { VAgendaDocument } from "@vcontext/core";
+import { query } from "@vcontext/query";
 import { readFile } from "fs/promises";
 
 // Parse document
@@ -1332,7 +1332,7 @@ pending.forEach(item => console.log(`  - ${item.title}`));
 ### Example 3: Creating a Plan
 
 ```typescript
-import { plan } from "@vagenda/builder";
+import { plan } from "@vcontext/builder";
 
 const doc = plan("Add user authentication", "0.2")
   .status("draft")
@@ -1352,11 +1352,11 @@ console.log(doc.toTRON());
 ### Example 4: Validation
 
 ```typescript
-import { VAgendaDocument } from "@vagenda/core";
-import { validate } from "@vagenda/validator";
+import { VAgendaDocument } from "@vcontext/core";
+import { validate } from "@vcontext/validator";
 
 const doc = VAgendaDocument.fromJSON(`{
-  "vAgendaInfo": {"version": "0.2"},
+  "vContextInfo": {"version": "0.2"},
   "todoList": {"items": []}
 }`);
 
@@ -1378,7 +1378,7 @@ if (result.valid) {
 // react/hooks/useTodoList.ts
 
 import { useState, useCallback } from "react";
-import { Document, TodoItem, ItemStatus } from "@vagenda/core";
+import { Document, TodoItem, ItemStatus } from "@vcontext/core";
 
 export function useTodoList(initialDoc: Document) {
   const [doc, setDoc] = useState(initialDoc);
@@ -1425,11 +1425,11 @@ export function useTodoList(initialDoc: Document) {
 }
 
 // Usage in component
-import { useTodoList } from "@vagenda/react";
+import { useTodoList } from "@vcontext/react";
 
 function TodoListComponent() {
   const { items, addItem, updateItemStatus } = useTodoList({
-    vAgendaInfo: { version: "0.2" },
+    vContextInfo: { version: "0.2" },
     todoList: { items: [] }
   });
 
@@ -1455,7 +1455,7 @@ function TodoListComponent() {
 // vue/composables/useTodoList.ts
 
 import { ref, computed } from "vue";
-import type { Document, TodoItem, ItemStatus } from "@vagenda/core";
+import type { Document, TodoItem, ItemStatus } from "@vcontext/core";
 
 export function useTodoList(initialDoc: Document) {
   const doc = ref(initialDoc);
@@ -1487,8 +1487,8 @@ export function useTodoList(initialDoc: Document) {
 ### Example 7: Direct Mutations
 
 ```typescript
-import { VAgendaDocument } from "@vagenda/core";
-import { mutateTodoList } from "@vagenda/mutator";
+import { VAgendaDocument } from "@vcontext/core";
+import { mutateTodoList } from "@vcontext/mutator";
 import { readFile, writeFile } from "fs/promises";
 
 // Parse existing document
@@ -1518,8 +1518,8 @@ await writeFile("tasks.tron", doc.toTRON());
 ### Example 8: Immutable Updates
 
 ```typescript
-import { VAgendaDocument } from "@vagenda/core";
-import { ImmutableUpdater } from "@vagenda/updater";
+import { VAgendaDocument } from "@vcontext/core";
+import { ImmutableUpdater } from "@vcontext/updater";
 import { readFile } from "fs/promises";
 
 // Parse document
@@ -1554,8 +1554,8 @@ console.log(newDoc.toJSON(true));
 ### Example 9: Validated Updates
 
 ```typescript
-import { VAgendaDocument } from "@vagenda/core";
-import { createUpdater } from "@vagenda/updater";
+import { VAgendaDocument } from "@vcontext/core";
+import { createUpdater } from "@vcontext/updater";
 import { readFile, writeFile } from "fs/promises";
 
 // Parse document
@@ -1589,8 +1589,8 @@ if (result2.success) {
 ### Example 10: Transactional Updates
 
 ```typescript
-import { todo } from "@vagenda/builder";
-import { createUpdater } from "@vagenda/updater";
+import { todo } from "@vcontext/builder";
+import { createUpdater } from "@vcontext/updater";
 
 // Create initial document
 const doc = todo("0.2")
@@ -1626,11 +1626,11 @@ if (result.success) {
 
 ```bash
 # Install globally
-npm install -g @vagenda/cli
+npm install -g @vcontext/cli
 # or
-pnpm add -g @vagenda/cli
+pnpm add -g @vcontext/cli
 # or
-bun add -g @vagenda/cli
+bun add -g @vcontext/cli
 
 # Create a new TodoList
 va create todo --version 0.2 --output tasks.tron
@@ -1677,7 +1677,7 @@ va serve tasks.tron --port 3000
 // __tests__/todo-builder.test.ts
 
 import { describe, it, expect } from "vitest";
-import { TodoListBuilder } from "@vagenda/builder";
+import { TodoListBuilder } from "@vcontext/builder";
 
 describe("TodoListBuilder", () => {
   it("creates a valid document", () => {
@@ -1686,8 +1686,8 @@ describe("TodoListBuilder", () => {
       .addItem("Task 1", "pending")
       .build();
 
-    expect(doc.vAgendaInfo.version).toBe("0.2");
-    expect(doc.vAgendaInfo.author).toBe("test-author");
+    expect(doc.vContextInfo.version).toBe("0.2");
+    expect(doc.vContextInfo.author).toBe("test-author");
     expect(doc.todoList?.items).toHaveLength(1);
     expect(doc.todoList?.items[0].title).toBe("Task 1");
   });
@@ -1710,8 +1710,8 @@ describe("TodoListBuilder", () => {
 // __tests__/integration/round-trip.test.ts
 
 import { describe, it, expect } from "vitest";
-import { todo } from "@vagenda/builder";
-import { VAgendaDocument } from "@vagenda/core";
+import { todo } from "@vcontext/builder";
+import { VAgendaDocument } from "@vcontext/core";
 
 describe("Round-trip conversion", () => {
   it("JSON -> parse -> JSON preserves data", () => {
@@ -1776,7 +1776,7 @@ describe("Round-trip conversion", () => {
 - Web components
 
 ### Phase 5: Tooling
-- CLI tool (@vagenda/cli)
+- CLI tool (@vcontext/cli)
 - VSCode extension
 - Web-based editor
 - Documentation site
@@ -1793,9 +1793,9 @@ describe("Round-trip conversion", () => {
 
 ```json
 {
-  "name": "@vagenda/core",
+  "name": "@vcontext/core",
   "version": "0.1.0",
-  "description": "Core types and interfaces for vAgenda",
+  "description": "Core types and interfaces for vContext",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -1824,7 +1824,7 @@ describe("Round-trip conversion", () => {
     "vitest": "^1.0.0"
   },
   "keywords": [
-    "vagenda",
+    "vcontext",
     "todo",
     "plan",
     "agenda",
@@ -1888,40 +1888,40 @@ packages:
 ```yaml
 # Taskfile.yml additions
 tasks:
-  vagenda:ts:install:
+  vcontext:ts:install:
     desc: Install dependencies
     cmds:
       - pnpm install
 
-  vagenda:ts:build:
+  vcontext:ts:build:
     desc: Build all packages
     cmds:
       - pnpm -r build
 
-  vagenda:ts:test:
+  vcontext:ts:test:
     desc: Run tests
     cmds:
       - pnpm -r test
 
-  vagenda:ts:coverage:
+  vcontext:ts:coverage:
     desc: Check test coverage
     cmds:
       - pnpm -r test:coverage
 
-  vagenda:ts:lint:
+  vcontext:ts:lint:
     desc: Lint code
     cmds:
       - pnpm -r lint
 
-  vagenda:ts:typecheck:
+  vcontext:ts:typecheck:
     desc: Type check
     cmds:
       - pnpm -r typecheck
 
-  vagenda:cli:run:
+  vcontext:cli:run:
     desc: Run CLI locally
     cmds:
-      - pnpm --filter @vagenda/cli dev
+      - pnpm --filter @vcontext/cli dev
 ```
 
 ## Runtime Support
@@ -1967,13 +1967,13 @@ The library targets:
 
 ## References
 
-- vAgenda Specification: https://github.com/visionik/vAgenda
+- vContext Specification: https://github.com/visionik/vContext
 - TypeScript Handbook: https://www.typescriptlang.org/docs/
 - TRON Format: https://tron-format.github.io/
 - Zod: https://zod.dev/
 - Vitest: https://vitest.dev/
-- vAgenda Go API: [vAgenda-extension-api-go.md](./vAgenda-extension-api-go.md)
-- vAgenda Beads Extension: [vAgenda-extension-beads.md](./vAgenda-extension-beads.md)
+- vContext Go API: [vContext-extension-api-go.md](./vContext-extension-api-go.md)
+- vContext Beads Extension: [vContext-extension-beads.md](./vContext-extension-beads.md)
 
 ## Community Feedback
 
@@ -1986,4 +1986,4 @@ This is a **draft proposal**. Feedback needed:
 5. What additional framework integrations would be valuable?
 6. Should we provide a web component library for framework-agnostic usage?
 
-**Discuss**: https://github.com/visionik/vAgenda/discussions
+**Discuss**: https://github.com/visionik/vContext/discussions

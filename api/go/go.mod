@@ -1,4 +1,4 @@
-module github.com/visionik/vAgenda/api/go
+module github.com/visionik/vContext/api/go
 
 go 1.25.4
 

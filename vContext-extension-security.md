@@ -1,4 +1,4 @@
-# vAgenda Extension Proposal: Security & Privacy
+# vContext Extension Proposal: Security & Privacy
 
 > **VERY EARLY DRAFT**: This is an initial proposal and subject to significant change. Comments, feedback, and suggestions are strongly encouraged. Please provide input via GitHub issues or discussions.
 
@@ -10,13 +10,13 @@
 
 ## Overview
 
-This extension defines security and privacy mechanisms for vAgenda documents, inspired by [vCon (Virtualized Conversations)](https://datatracker.ietf.org/wg/vcon/about/) which standardizes security for conversational data. Like vCon, vAgenda documents can exist in three security modes: **unsigned** (trusted environments), **signed** (integrity verification), and **encrypted** (confidentiality protection).
+This extension defines security and privacy mechanisms for vContext documents, inspired by [vCon (Virtualized Conversations)](https://datatracker.ietf.org/wg/vcon/about/) which standardizes security for conversational data. Like vCon, vContext documents can exist in three security modes: **unsigned** (trusted environments), **signed** (integrity verification), and **encrypted** (confidentiality protection).
 
 Additionally, this extension addresses privacy compliance requirements (GDPR, CCPA, HIPAA) through redaction mechanisms, consent tracking, and data minimization patterns.
 
 ## Motivation
 
-**Security requirements for vAgenda:**
+**Security requirements for vContext:**
 - **Data integrity**: Verify that todos, plans, and playbooks haven't been tampered with
 - **Authentication**: Confirm the identity of document creators and modifiers
 - **Confidentiality**: Protect sensitive information (business strategies, security plans, proprietary learnings)
@@ -30,12 +30,12 @@ Additionally, this extension addresses privacy compliance requirements (GDPR, CC
 - **Redaction**: Remove or mask sensitive information while preserving structure
 - **Audit trails**: Track who accessed or modified personal data
 
-**Integration goal**: Make vAgenda documents securable and privacy-compliant by default, enabling use in enterprise, healthcare, legal, and regulated environments.
+**Integration goal**: Make vContext documents securable and privacy-compliant by default, enabling use in enterprise, healthcare, legal, and regulated environments.
 
 ## Dependencies
 
 **Required**:
-- Core vAgenda types (vAgendaInfo, TodoList, TodoItem, Plan, Phase, Narrative)
+- Core vContext types (vContextInfo, TodoList, TodoItem, Plan, Phase, Narrative)
 - Extension 1 (Timestamps) - for temporal validity and expiration
 - Extension 2 (Identifiers) - for tracking entities and consent
 
@@ -46,11 +46,11 @@ Additionally, this extension addresses privacy compliance requirements (GDPR, CC
 
 ## Security Modes
 
-vAgenda documents can exist in three forms, analogous to vCon:
+vContext documents can exist in three forms, analogous to vCon:
 
 ### 1. Unsigned (Trusted Environments)
 
-Plain vAgenda document with no cryptographic protection.
+Plain vContext document with no cryptographic protection.
 
 **Use cases**:
 - Local development
@@ -61,7 +61,7 @@ Plain vAgenda document with no cryptographic protection.
 **Example structure**:
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.2",
     "securityMode": "unsigned"
   },
@@ -73,7 +73,7 @@ Plain vAgenda document with no cryptographic protection.
 
 ### 2. Signed (Integrity Verification)
 
-vAgenda document wrapped in JSON Web Signature (JWS) [RFC 7515].
+vContext document wrapped in JSON Web Signature (JWS) [RFC 7515].
 
 **Use cases**:
 - Verify document hasn't been modified
@@ -86,7 +86,7 @@ vAgenda document wrapped in JSON Web Signature (JWS) [RFC 7515].
 ```
 eyJhbGciOiJFUzI1NiIsInR5cCI6Ikp...  (header)
 .
-eyJ2QWdlbmRhSW5mbyI6eyJ2ZXJzaW9...  (payload: base64url-encoded vAgenda)
+eyJ2QWdlbmRhSW5mbyI6eyJ2ZXJzaW9...  (payload: base64url-encoded vContext)
 .
 MEUCIQDKZokl-...                      (signature)
 ```
@@ -95,7 +95,7 @@ MEUCIQDKZokl-...                      (signature)
 ```json
 {
   "alg": "ES256",
-  "typ": "vAgenda+jws",
+  "typ": "vContext+jws",
   "kid": "agent-key-2024-12-27",
   "iat": 1735348800
 }
@@ -106,11 +106,11 @@ MEUCIQDKZokl-...                      (signature)
 2. Decode header and payload
 3. Verify signature using public key (from `kid`)
 4. Validate timestamp (`iat`) is recent
-5. Parse payload as vAgenda document
+5. Parse payload as vContext document
 
 ### 3. Encrypted (Confidentiality Protection)
 
-vAgenda document wrapped in JSON Web Encryption (JWE) [RFC 7516].
+vContext document wrapped in JSON Web Encryption (JWE) [RFC 7516].
 
 **Use cases**:
 - Sensitive business plans
@@ -128,7 +128,7 @@ GciOiJSU0EtT0FFUCIsImVuYyI6IkE...  (encrypted key)
 .
 48V1_ALb6US04U3b...                  (IV)
 .
-5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TA...  (ciphertext: encrypted vAgenda)
+5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TA...  (ciphertext: encrypted vContext)
 .
 XFBoMYUZodetZdvTiFvSkQ                (auth tag)
 ```
@@ -138,7 +138,7 @@ XFBoMYUZodetZdvTiFvSkQ                (auth tag)
 {
   "alg": "RSA-OAEP",
   "enc": "A256GCM",
-  "typ": "vAgenda+jwe",
+  "typ": "vContext+jwe",
   "kid": "recipient-key-abc123"
 }
 ```
@@ -147,7 +147,7 @@ XFBoMYUZodetZdvTiFvSkQ                (auth tag)
 1. Parse JWE compact serialization
 2. Decrypt content encryption key (CEK) using recipient's private key
 3. Use CEK to decrypt ciphertext
-4. Parse decrypted payload as vAgenda document
+4. Parse decrypted payload as vContext document
 
 ## New Types
 
@@ -215,10 +215,10 @@ AccessControl {
 }
 ```
 
-## vAgendaInfo Extensions
+## vContextInfo Extensions
 
 ```javascript
-vAgendaInfo {
+vContextInfo {
   // Core fields...
   security?: SecurityInfo      # Security mode and metadata
   accessControl?: AccessControl # Who can access this document
@@ -292,7 +292,7 @@ Learning {
 ```typescript
 // 1. Create unsigned plan
 const plan: VAgendaDocument = {
-  vAgendaInfo: {
+  vContextInfo: {
     version: "0.2",
     author: "alice@example.com"
   },
@@ -315,7 +315,7 @@ const privateKey = await loadPrivateKey("alice-signing-key");
 const jwt = await new SignJWT(plan)
   .setProtectedHeader({ 
     alg: 'ES256', 
-    typ: 'vAgenda+jws',
+    typ: 'vContext+jws',
     kid: 'alice-key-2024'
   })
   .setIssuedAt()
@@ -330,7 +330,7 @@ import { jwtVerify } from 'jose';
 
 const publicKey = await loadPublicKey("alice-key-2024");
 const { payload } = await jwtVerify(jwt, publicKey);
-// payload is now verified vAgenda plan
+// payload is now verified vContext plan
 ```
 
 ### Pattern 2: Encrypted TodoList for Security Team
@@ -340,7 +340,7 @@ const { payload } = await jwtVerify(jwt, publicKey);
 ```typescript
 // 1. Create sensitive todo list
 const todoList: VAgendaDocument = {
-  vAgendaInfo: {
+  vContextInfo: {
     version: "0.2",
     classification: "confidential"
   },
@@ -370,7 +370,7 @@ const jwe = await new CompactEncrypt(
   .setProtectedHeader({ 
     alg: 'RSA-OAEP', 
     enc: 'A256GCM',
-    typ: 'vAgenda+jwe',
+    typ: 'vContext+jwe',
     kid: 'security-team-2024'
   })
   .encrypt(recipientPublicKey);
@@ -384,7 +384,7 @@ import { compactDecrypt } from 'jose';
 const privateKey = await loadPrivateKey("security-team-2024");
 const { plaintext } = await compactDecrypt(jwe, privateKey);
 const decrypted = JSON.parse(new TextDecoder().decode(plaintext));
-// decrypted is now the original vAgenda document
+// decrypted is now the original vContext document
 ```
 
 ### Pattern 3: Redaction for Public Sharing
@@ -394,7 +394,7 @@ const decrypted = JSON.parse(new TextDecoder().decode(plaintext));
 ```typescript
 // Original plan (internal)
 const internalPlan: VAgendaDocument = {
-  vAgendaInfo: {
+  vContextInfo: {
     version: "0.2",
     classification: "internal"
   },
@@ -414,8 +414,8 @@ const internalPlan: VAgendaDocument = {
 // Redact sensitive narratives
 const publicPlan: VAgendaDocument = {
   ...internalPlan,
-  vAgendaInfo: {
-    ...internalPlan.vAgendaInfo,
+  vContextInfo: {
+    ...internalPlan.vContextInfo,
     classification: "public"
   },
   plan: {
@@ -449,7 +449,7 @@ await publishToGitHub(publicPlan);
 // System searches for user's data
 const userEmail = "bob@example.com";
 
-// Find all vAgenda documents mentioning user
+// Find all vContext documents mentioning user
 const documents = await searchDocuments({
   author: userEmail,
   assignee: userEmail,
@@ -467,7 +467,7 @@ const exportPackage = {
     ...doc,
     _metadata: {
       retrieved: new Date().toISOString(),
-      source: "vAgenda system"
+      source: "vContext system"
     }
   }))
 };
@@ -493,7 +493,7 @@ const documents = await searchDocuments({
 
 // Redact or delete
 for (const doc of documents) {
-  if (doc.vAgendaInfo.legalHold) {
+  if (doc.vContextInfo.legalHold) {
     // Cannot delete - legal hold active
     console.warn(`Cannot delete ${doc.id} - legal hold`);
     continue;
@@ -535,7 +535,7 @@ const consent: ConsentRecord = {
 
 // Add to document
 const doc: VAgendaDocument = {
-  vAgendaInfo: {
+  vContextInfo: {
     version: "0.2",
     consents: [consent]
   },
@@ -548,7 +548,7 @@ const doc: VAgendaDocument = {
 function canAnalyze(doc: VAgendaDocument, purpose: string): boolean {
   const now = new Date();
   
-  return doc.vAgendaInfo.consents?.some(consent => 
+  return doc.vContextInfo.consents?.some(consent => 
     consent.purpose.includes(purpose) &&
     !consent.revokedAt &&
     (!consent.expiresAt || new Date(consent.expiresAt) > now)
@@ -569,7 +569,7 @@ if (canAnalyze(doc, "ai_analysis")) {
 ```typescript
 // Public roadmap plan
 const publicPlan: VAgendaDocument = {
-  vAgendaInfo: {
+  vContextInfo: {
     version: "0.2",
     classification: "public",
     accessControl: {
@@ -586,7 +586,7 @@ const publicPlan: VAgendaDocument = {
 
 // Internal implementation plan (linked to public)
 const internalPlan: VAgendaDocument = {
-  vAgendaInfo: {
+  vContextInfo: {
     version: "0.2",
     classification: "internal",
     accessControl: {
@@ -614,7 +614,7 @@ const internalPlan: VAgendaDocument = {
 
 // Confidential security hardening plan
 const confidentialPlan: VAgendaDocument = {
-  vAgendaInfo: {
+  vContextInfo: {
     version: "0.2",
     classification: "confidential",
     accessControl: {
@@ -640,7 +640,7 @@ const confidentialPlan: VAgendaDocument = {
 
 // Check access before displaying
 function canAccess(doc: VAgendaDocument, user: User): boolean {
-  const ac = doc.vAgendaInfo.accessControl;
+  const ac = doc.vContextInfo.accessControl;
   
   if (ac?.public) return true;
   if (ac?.owner === user.id) return true;
@@ -656,7 +656,7 @@ function canAccess(doc: VAgendaDocument, user: User): boolean {
 ### Signing Implementation
 
 ```typescript
-// Sign a vAgenda document
+// Sign a vContext document
 import { SignJWT, importPKCS8 } from 'jose';
 
 async function signDocument(
@@ -669,7 +669,7 @@ async function signDocument(
   const jws = await new SignJWT(doc)
     .setProtectedHeader({
       alg: 'ES256',
-      typ: 'vAgenda+jws',
+      typ: 'vContext+jws',
       kid: keyId
     })
     .setIssuedAt()
@@ -679,7 +679,7 @@ async function signDocument(
   return jws;
 }
 
-// Verify a signed vAgenda document
+// Verify a signed vContext document
 import { jwtVerify, importSPKI } from 'jose';
 
 async function verifyDocument(
@@ -689,7 +689,7 @@ async function verifyDocument(
   const publicKey = await importSPKI(publicKeyPem, 'ES256');
   
   const { payload } = await jwtVerify(jws, publicKey, {
-    typ: 'vAgenda+jws'
+    typ: 'vContext+jws'
   });
   
   return payload as VAgendaDocument;
@@ -699,7 +699,7 @@ async function verifyDocument(
 ### Encryption Implementation
 
 ```typescript
-// Encrypt a vAgenda document
+// Encrypt a vContext document
 import { CompactEncrypt, importSPKI } from 'jose';
 
 async function encryptDocument(
@@ -715,7 +715,7 @@ async function encryptDocument(
     .setProtectedHeader({
       alg: 'RSA-OAEP',
       enc: 'A256GCM',
-      typ: 'vAgenda+jwe',
+      typ: 'vContext+jwe',
       kid: recipientKeyId
     })
     .encrypt(publicKey);
@@ -723,7 +723,7 @@ async function encryptDocument(
   return jwe;
 }
 
-// Decrypt a vAgenda document
+// Decrypt a vContext document
 import { compactDecrypt, importPKCS8 } from 'jose';
 
 async function decryptDocument(
@@ -839,7 +839,7 @@ interface User {
 
 class AccessControlService {
   canRead(doc: VAgendaDocument, user: User): boolean {
-    const ac = doc.vAgendaInfo.accessControl;
+    const ac = doc.vContextInfo.accessControl;
     if (!ac) return true;  // No AC = public
     
     if (ac.public) return true;
@@ -852,7 +852,7 @@ class AccessControlService {
   }
   
   canWrite(doc: VAgendaDocument, user: User): boolean {
-    const ac = doc.vAgendaInfo.accessControl;
+    const ac = doc.vContextInfo.accessControl;
     if (!ac) return true;
     
     if (ac.owner === user.id) return true;
@@ -864,7 +864,7 @@ class AccessControlService {
   }
   
   canAdmin(doc: VAgendaDocument, user: User): boolean {
-    const ac = doc.vAgendaInfo.accessControl;
+    const ac = doc.vContextInfo.accessControl;
     if (!ac) return true;
     
     if (ac.owner === user.id) return true;
@@ -889,7 +889,7 @@ class AccessControlService {
         if (!itemAC) return true;
         
         // Apply same logic as document-level
-        return this.canRead({ vAgendaInfo: { accessControl: itemAC } } as any, user);
+        return this.canRead({ vContextInfo: { accessControl: itemAC } } as any, user);
       });
     }
     
@@ -899,7 +899,7 @@ class AccessControlService {
         const phaseAC = phase.accessControl;
         if (!phaseAC) return true;
         
-        return this.canRead({ vAgendaInfo: { accessControl: phaseAC } } as any, user);
+        return this.canRead({ vContextInfo: { accessControl: phaseAC } } as any, user);
       });
     }
     
@@ -979,7 +979,7 @@ Always validate:
 - Common values: "consent", "contract", "legal_obligation", "legitimate_interest"
 
 **Article 15** (Right to Access):
-- Implement search across all vAgenda documents
+- Implement search across all vContext documents
 - Export user's data in machine-readable format
 - Include metadata about data processing
 
@@ -1007,7 +1007,7 @@ Always validate:
 
 ### HIPAA Compliance
 
-For healthcare-related vAgenda documents:
+For healthcare-related vContext documents:
 
 **PHI Protection**:
 - Always use encrypted mode for PHI
@@ -1070,8 +1070,8 @@ Playbook security:
 
 ### Unsigned
 
-**TRON**: `.tron` / `application/vnd.vagenda+tron`  
-**JSON**: `.json` / `application/vnd.vagenda+json`
+**TRON**: `.tron` / `application/vnd.vcontext+tron`  
+**JSON**: `.json` / `application/vnd.vcontext+json`
 
 ### Signed (JWS)
 
@@ -1089,7 +1089,7 @@ Nest JWE inside JWS or vice versa:
 
 **Encrypt then Sign** (recommended):
 ```
-sign(encrypt(vAgenda))
+sign(encrypt(vContext))
 ```
 - Provides authenticity and confidentiality
 - Signature validates encrypted content
@@ -1097,14 +1097,14 @@ sign(encrypt(vAgenda))
 
 **Sign then Encrypt**:
 ```
-encrypt(sign(vAgenda))
+encrypt(sign(vContext))
 ```
 - Hides signature from intermediaries
 - File extension: `.jwe` (outermost format)
 
 ## Open Questions
 
-1. **Key Distribution**: Should vAgenda define a key discovery mechanism or rely on external PKI?
+1. **Key Distribution**: Should vContext define a key discovery mechanism or rely on external PKI?
 
 2. **Selective Disclosure**: Should we support ZKP (zero-knowledge proofs) for proving properties without revealing data?
 
@@ -1112,7 +1112,7 @@ encrypt(sign(vAgenda))
 
 4. **Blockchain Integration**: Should redaction hashes be anchored in blockchain for tamper-evidence?
 
-5. **Homomorphic Encryption**: Can we enable analysis on encrypted vAgenda documents?
+5. **Homomorphic Encryption**: Can we enable analysis on encrypted vContext documents?
 
 6. **Multi-Recipient Encryption**: Should we define a standard for encrypting once for multiple recipients (like JWE with multiple recipients)?
 
@@ -1151,15 +1151,15 @@ All documents are unsigned. Focus on schema validation and data quality.
 We're seeking feedback on:
 
 1. **Algorithm choices**: Are ES256 and RSA-OAEP the right defaults?
-2. **Key management**: Should vAgenda define key distribution or use existing PKI?
+2. **Key management**: Should vContext define key distribution or use existing PKI?
 3. **Redaction granularity**: Is field-level redaction sufficient or do we need finer control?
 4. **Compliance scope**: Are GDPR, CCPA, HIPAA sufficient or should we add others?
 5. **Performance**: How do signing/encryption impact large documents (e.g., 100+ item todo lists)?
-6. **Multi-tenant**: How should security work in shared vAgenda servers?
+6. **Multi-tenant**: How should security work in shared vContext servers?
 
 Please provide feedback via:
-- GitHub issues: https://github.com/visionik/vAgenda/issues
-- GitHub discussions: https://github.com/visionik/vAgenda/discussions
+- GitHub issues: https://github.com/visionik/vContext/issues
+- GitHub discussions: https://github.com/visionik/vContext/discussions
 - Email: visionik@pobox.com
 
 ## References
@@ -1181,7 +1181,7 @@ Please provide feedback via:
 - **CCPA**: California Consumer Privacy Act - https://oag.ca.gov/privacy/ccpa
 - **HIPAA**: Health Insurance Portability and Accountability Act - https://www.hhs.gov/hipaa/
 
-### vAgenda
+### vContext
 - **Core Specification**: README.md
 - **Extension 1 (Timestamps)**: README.md#extension-1-timestamps
 - **Extension 2 (Identifiers)**: README.md#extension-2-identifiers

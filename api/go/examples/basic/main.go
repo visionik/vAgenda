@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/visionik/vAgenda/api/go/pkg/builder"
-	"github.com/visionik/vAgenda/api/go/pkg/convert"
-	"github.com/visionik/vAgenda/api/go/pkg/core"
-	"github.com/visionik/vAgenda/api/go/pkg/parser"
-	"github.com/visionik/vAgenda/api/go/pkg/query"
-	"github.com/visionik/vAgenda/api/go/pkg/validator"
+	"github.com/visionik/vContext/api/go/pkg/builder"
+	"github.com/visionik/vContext/api/go/pkg/convert"
+	"github.com/visionik/vContext/api/go/pkg/core"
+	"github.com/visionik/vContext/api/go/pkg/parser"
+	"github.com/visionik/vContext/api/go/pkg/query"
+	"github.com/visionik/vContext/api/go/pkg/validator"
 )
 
 func main() {
-	fmt.Println("=== vAgenda Go Library Examples ===")
+	fmt.Println("=== vContext Go Library Examples ===")
 	fmt.Println()
 
 	// Example 1: Build a TodoList

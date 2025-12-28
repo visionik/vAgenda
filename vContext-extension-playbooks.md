@@ -1,4 +1,4 @@
-# vAgenda Extension: Playbooks
+# vContext Extension: Playbooks
 
 > **DRAFT EXTENSION**: This document is a draft and subject to change.
 
@@ -10,7 +10,7 @@
 
 ## Overview
 
-In vAgenda terms:
+In vContext terms:
 - TodoLists cover **short-term memory** (what to do next).
 - Plans cover **medium-term memory** (what/why/how for a piece of work).
 - Playbooks cover **long-term memory**: reusable strategies, rules-of-thumb, and warnings that persist across runs.
@@ -57,7 +57,7 @@ A typical loop:
 4. **Reuse**
    - Retrieve a relevant subset of entries for the next run.
 
-vAgenda supports this by storing long-term knowledge as Playbook Entries; Entries become an append-only log that preserves history in the playbook.
+vContext supports this by storing long-term knowledge as Playbook Entries; Entries become an append-only log that preserves history in the playbook.
 
 - Each playbook entry has an `operation` and either creates a new logical entry or updates/deprecates an existing one.
 - Updates form a **per-entry linked list** via `prevEventId` (not a single global chain).
@@ -73,7 +73,7 @@ Notes:
 
 ## Machine-verifiable schema (JSON)
 
-The playbooks extension schema is provided at `schemas/vagenda-extension-playbooks.schema.json`.
+The playbooks extension schema is provided at `schemas/vcontext-extension-playbooks.schema.json`.
 
 ## Data model
 
@@ -395,7 +395,7 @@ These examples show how a playbook might look in practice for an agentic softwar
 ### TRON: playbook embedded in a Plan
 
 ```tron
-class vAgendaInfo: version
+class vContextInfo: version
 class Plan: id, title, status, narratives, playbook
 class Narrative: title, content
 class Playbook: version, created, updated, entries, metrics
@@ -407,7 +407,7 @@ class PlaybookItem:
   status, deprecatedReason, supersedes, supersededBy, duplicateOf,
   reason
 
-vAgendaInfo: vAgendaInfo("0.2")
+vContextInfo: vContextInfo("0.2")
 plan: Plan(
   "plan-playbooks-realworld-001",
   "Agent workflow rules",
@@ -475,7 +475,7 @@ plan: Plan(
 
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.2"
   },
   "plan": {

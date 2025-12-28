@@ -1,10 +1,10 @@
-# vAgenda Specification v0.3
+# vContext Specification v0.3
 
 > **DRAFT SPECIFICATION**: This document is a draft and subject to change. Feedback, suggestions, and contributions from the community are highly encouraged. Please submit input via GitHub issues or pull requests.
 
 Agentic coding systems increasingly rely on structured memory: **short-term memory** (todo lists for immediate tasks), **medium-term memory** (plans for project organization), and **long-term memory** (playbooks for accumulated strategies and learnings). However, proprietary formats used by different agentic systems hamper interoperability and limit cross-agent collaboration.
 
-vAgenda provides an **open, standardized format** for these memory systems that is:
+vContext provides an **open, standardized format** for these memory systems that is:
 - **Agent-friendly**: Token-efficient TRON encoding optimized for LLM workflows
 - **Human-readable**: Clear structure for direct/TUI/GUI editing and review
 - **Interoperable**: JSON compatibility for integration with existing tools
@@ -44,9 +44,9 @@ This enables both agentic systems and human-facing tools to share a common repre
 
 The key words **MUST**, **SHOULD**, and **MAY** in this document are to be interpreted as normative requirements.
 
-A document is **vAgenda Core v0.3 conformant** if:
-- It is a single object containing `vAgendaInfo` and exactly one of `todoList`, `plan`, or `playbook`.
-- `vAgendaInfo.version` MUST equal `"0.3"`.
+A document is **vContext Core v0.3 conformant** if:
+- It is a single object containing `vContextInfo` and exactly one of `todoList`, `plan`, or `playbook`.
+- `vContextInfo.version` MUST equal `"0.3"`.
 - Any `status` fields MUST use only the enumerated values defined in this spec.
 
 ### Extensibility and unknown fields
@@ -70,12 +70,12 @@ When Extension 2 (Identifiers) and/or Extension 10 (Version Control & Sync) are 
 ## Machine-verifiable schemas (JSON)
 
 This spec includes JSON Schema files intended for validation and tooling:
-- Core schema: `schemas/vagenda-core.schema.json`
-- Playbooks extension schema: `schemas/vagenda-extension-playbooks.schema.json`
+- Core schema: `schemas/vcontext-core.schema.json`
+- Playbooks extension schema: `schemas/vcontext-extension-playbooks.schema.json`
 
 ## Design Philosophy
 
-vAgenda uses a **modular, layered architecture**:
+vContext uses a **modular, layered architecture**:
 1. **Core (MVA)**: Minimum Viable Agenda - essential fields only
 2. **Extensions**: Optional feature modules that add capabilities
 3. **Compatibility**: Extensions can be mixed and matched
@@ -84,7 +84,7 @@ This prevents complexity overload while supporting advanced use cases.
 
 ## Why Two Formats? TRON and JSON
 
-vAgenda supports both TRON and JSON encodings. **TRON is the preferred format** for AI/agent workflows due to its token efficiency, with JSON included for wider compatibility with existing tools and systems.
+vContext supports both TRON and JSON encodings. **TRON is the preferred format** for AI/agent workflows due to its token efficiency, with JSON included for wider compatibility with existing tools and systems.
 
 ### TRON (Token Reduced Object Notation) — Preferred
 
@@ -140,7 +140,7 @@ items: [
 
 - **Nested structures**: TRON objectively uses fewer tokens for deeply nested data (plans with phases, hierarchical todo lists)
 - **Readability**: TRON's class syntax `TodoItem("id", "title")` is subjectively more human readable than TOON's YAML+CSV hybrid
-- **Use case fit**: TOON excels at flat tabular data; vAgenda's hierarchical structures suit TRON better
+- **Use case fit**: TOON excels at flat tabular data; vContext's hierarchical structures suit TRON better
 
 **Note**: Both JSON and TRON are lossless representations of the same data model.
 
@@ -195,12 +195,12 @@ items: [
 
 **Rule of thumb**: If you find yourself wanting to explain "why" or document the approach, use a Plan. If you just need to track "what" to do, use a TodoList.
 
-### vAgendaInfo (Core)
+### vContextInfo (Core)
 
 **Purpose**: Document-level metadata that appears once per file, as a sibling to the main content object (TodoList or Plan). Contains version information and optional authorship details.
 
 ```javascript
-vAgendaInfo {
+vContextInfo {
   version: string          # Schema version (e.g., "0.2")
   author?: string          # Document creator
   description?: string     # Brief document description
@@ -208,35 +208,35 @@ vAgendaInfo {
 }
 ```
 
-**Document Structure**: A vAgenda document contains `vAgendaInfo` and either `todoList` or `plan`:
+**Document Structure**: A vContext document contains `vContextInfo` and either `todoList` or `plan`:
 ```javascript
 {
-  vAgendaInfo: vAgendaInfo,  # Document metadata (required)
+  vContextInfo: vContextInfo,  # Document metadata (required)
   todoList?: TodoList,       # Either todoList...
   plan?: Plan                # ...or plan (not both)
 }
 ```
 
-**Cross-document references**: Containers and items MAY reference other vAgenda documents or external resources using URIs (see Extension 7). This allows related containers to be linked without embedding them in a single file:
+**Cross-document references**: Containers and items MAY reference other vContext documents or external resources using URIs (see Extension 7). This allows related containers to be linked without embedding them in a single file:
 ```javascript
 // Plan referencing a separate TodoList document
 {
-  vAgendaInfo: {...},
+  vContextInfo: {...},
   plan: {
     title: "Feature Implementation",
-    uris: [{uri: "file://./tasks.vagenda.json", type: "x-vagenda/todoList"}],
+    uris: [{uri: "file://./tasks.vcontext.json", type: "x-vcontext/todoList"}],
     ...
   }
 }
 
 // TodoItem referencing a Plan document
 {
-  vAgendaInfo: {...},
+  vContextInfo: {...},
   todoList: {
     items: [
       {
         title: "Implement auth feature",
-        uris: [{uri: "file://./auth-plan.vagenda.json", type: "x-vagenda/plan"}]
+        uris: [{uri: "file://./auth-plan.vcontext.json", type: "x-vcontext/plan"}]
       }
     ]
   }
@@ -282,7 +282,7 @@ TodoList {
 
 ### TodoItem (Core)
 
-**Purpose**: A single actionable task with status tracking. The fundamental unit of work in vAgenda.
+**Purpose**: A single actionable task with status tracking. The fundamental unit of work in vContext.
 
 ```javascript
 TodoItem {
@@ -335,11 +335,11 @@ Narrative {
 
 **TRON:**
 ```tron
-class vAgendaInfo: version
+class vContextInfo: version
 class TodoList: items
 class TodoItem: title, status
 
-vAgendaInfo: vAgendaInfo("0.3")
+vContextInfo: vContextInfo("0.3")
 todoList: TodoList([
   TodoItem("Implement authentication", "pending"),
   TodoItem("Write API documentation", "pending")
@@ -349,7 +349,7 @@ todoList: TodoList([
 **JSON:**
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3"
   },
   "todoList": {
@@ -371,12 +371,12 @@ todoList: TodoList([
 
 **TRON:**
 ```tron
-class vAgendaInfo: version
+class vContextInfo: version
 class Plan: title, status, narratives, items
 class PlanItem: title, status
 class Narrative: title, content
 
-vAgendaInfo: vAgendaInfo("0.3")
+vContextInfo: vContextInfo("0.3")
 plan: Plan(
   "Add user authentication",
   "draft",
@@ -396,7 +396,7 @@ plan: Plan(
 **JSON:**
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3"
   },
   "plan": {
@@ -432,14 +432,14 @@ Extensions add optional fields to core types. Implementations can support any co
 
 Some extensions have dedicated spec documents:
 
-- `vAgenda-extension-playbooks.md` — Playbooks (long-term, evolving context)
-- `vAgenda-extension-MCP.md` — Model Context Protocol (MCP) integration
-- `vAgenda-extension-beads.md` — Beads integration
-- `vAgenda-extension-claude.md` — Claude integration
-- `vAgenda-extension-security.md` — Security extension
-- `vAgenda-extension-api-go.md` — Go API extension
-- `vAgenda-extension-api-python.md` — Python API extension
-- `vAgenda-extension-api-typescript.md` — TypeScript API extension
+- `vContext-extension-playbooks.md` — Playbooks (long-term, evolving context)
+- `vContext-extension-MCP.md` — Model Context Protocol (MCP) integration
+- `vContext-extension-beads.md` — Beads integration
+- `vContext-extension-claude.md` — Claude integration
+- `vContext-extension-security.md` — Security extension
+- `vContext-extension-api-go.md` — Go API extension
+- `vContext-extension-api-python.md` — Python API extension
+- `vContext-extension-api-typescript.md` — TypeScript API extension
 
 ## Extension 1: Timestamps
 
@@ -447,9 +447,9 @@ Some extensions have dedicated spec documents:
 
 Adds creation and modification tracking with timezone support.
 
-### vAgendaInfo Extensions
+### vContextInfo Extensions
 ```javascript
-vAgendaInfo {
+vContextInfo {
   // Core fields...
   created: datetime        # ISO 8601 timestamp (UTC default)
   updated: datetime        # ISO 8601 timestamp (UTC default)
@@ -470,11 +470,11 @@ TodoItem {
 
 **TRON:**
 ```tron
-class vAgendaInfo: version, created, updated, timezone
+class vContextInfo: version, created, updated, timezone
 class TodoList: items
 class TodoItem: title, status, created, updated
 
-vAgendaInfo: vAgendaInfo("0.3", "2024-12-27T09:00:00Z", "2024-12-27T10:00:00Z", "America/Los_Angeles")
+vContextInfo: vContextInfo("0.3", "2024-12-27T09:00:00Z", "2024-12-27T10:00:00Z", "America/Los_Angeles")
 todoList: TodoList([
   TodoItem(
     "Implement authentication",
@@ -494,7 +494,7 @@ todoList: TodoList([
 **JSON:**
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3",
     "created": "2024-12-27T09:00:00Z",
     "updated": "2024-12-27T10:00:00Z",
@@ -561,11 +561,11 @@ PlanItem {
 
 **TRON:**
 ```tron
-class vAgendaInfo: version
+class vContextInfo: version
 class TodoList: id, items
 class TodoItem: id, title, status
 
-vAgendaInfo: vAgendaInfo("0.3")
+vContextInfo: vContextInfo("0.3")
 todoList: TodoList(
   "todo-001",
   [
@@ -578,7 +578,7 @@ todoList: TodoList(
 **JSON:**
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3"
   },
   "todoList": {
@@ -605,7 +605,7 @@ todoList: TodoList(
 
 Adds descriptive and organizational fields.
 
-**Key atomic: Tagged** - The `tags` field can be added to ALL vAgenda entities (TodoList, TodoItem, Plan, PlanItem, Playbook, PlaybookItem, ProblemModel) for categorization and filtering. Tags enable flexible organization without rigid taxonomies.
+**Key atomic: Tagged** - The `tags` field can be added to ALL vContext entities (TodoList, TodoItem, Plan, PlanItem, Playbook, PlaybookItem, ProblemModel) for categorization and filtering. Tags enable flexible organization without rigid taxonomies.
 
 ### TodoList Extensions
 ```javascript
@@ -722,13 +722,13 @@ PlanItem {
 
 **TRON:**
 ```tron
-class vAgendaInfo: version
+class vContextInfo: version
 class TodoItem: id, title, status, dependencies
 class Plan: id, title, status, narratives, items
 class PlanItem: id, title, status, dependencies
 class Narrative: title, content
 
-vAgendaInfo: vAgendaInfo("0.3")
+vContextInfo: vContextInfo("0.3")
 plan: Plan(
   "plan-002",
   "Build authentication system",
@@ -750,7 +750,7 @@ plan: Plan(
 **JSON:**
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3"
   },
   "plan": {
@@ -947,10 +947,10 @@ Location {
 }
 
 VAgendaReference {
-  # Same shape as URI, but MUST point to another vAgenda document.
-  uri: string             # MUST be a URI to a vAgenda document (file:// or https://)
+  # Same shape as URI, but MUST point to another vContext document.
+  uri: string             # MUST be a URI to a vContext document (file:// or https://)
   type: enum              # MUST be one of:
-                          #   "x-vagenda/todoList" | "x-vagenda/plan" | "x-vagenda/playbook"
+                          #   "x-vcontext/todoList" | "x-vcontext/plan" | "x-vcontext/playbook"
   title?: string
   description?: string
   tags?: string[]
@@ -986,8 +986,8 @@ PlanItem {
 ```javascript
 Plan {
   // Prior extensions...
-  uris?: URI[]                    # External resources OR other vAgenda documents
-  references?: VAgendaReference[] # vAgenda-only links (subset of URI)
+  uris?: URI[]                    # External resources OR other vContext documents
+  references?: VAgendaReference[] # vContext-only links (subset of URI)
 }
 ```
 
@@ -1034,12 +1034,12 @@ TodoItem(
 
 ### Example: Cross-Container References
 
-URIs enable linking related vAgenda documents without embedding them:
+URIs enable linking related vContext documents without embedding them:
 
 **JSON (Plan referencing TodoList):**
 ```json
 {
-  "vAgendaInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.3"},
   "plan": {
     "title": "Authentication System",
     "status": "inProgress",
@@ -1051,8 +1051,8 @@ URIs enable linking related vAgenda documents without embedding them:
     },
     "uris": [
       {
-        "uri": "file://./auth-tasks.vagenda.json",
-        "type": "x-vagenda/todoList",
+        "uri": "file://./auth-tasks.vcontext.json",
+        "type": "x-vcontext/todoList",
         "description": "Implementation tasks"
       }
     ]
@@ -1063,7 +1063,7 @@ URIs enable linking related vAgenda documents without embedding them:
 **JSON (TodoList with items referencing Plans):**
 ```json
 {
-  "vAgendaInfo": {"version": "0.3"},
+  "vContextInfo": {"version": "0.3"},
   "todoList": {
     "items": [
       {
@@ -1071,8 +1071,8 @@ URIs enable linking related vAgenda documents without embedding them:
         "status": "pending",
         "uris": [
           {
-            "uri": "file://./auth-plan.vagenda.json",
-            "type": "x-vagenda/plan"
+            "uri": "file://./auth-plan.vcontext.json",
+            "type": "x-vcontext/plan"
           }
         ]
       },
@@ -1081,8 +1081,8 @@ URIs enable linking related vAgenda documents without embedding them:
         "status": "inProgress",
         "uris": [
           {
-            "uri": "file://./auth-plan.vagenda.json#jwt-phase",
-            "type": "x-vagenda/plan",
+            "uri": "file://./auth-plan.vcontext.json#jwt-phase",
+            "type": "x-vcontext/plan",
             "description": "JWT implementation phase"
           }
         ]
@@ -1318,13 +1318,13 @@ PlanItem {
 
 **TRON:**
 ```tron
-class vAgendaInfo: version
+class vContextInfo: version
 class TodoList: id, items, uid, agent, sequence, changeLog
 class TodoItem: id, title, status
 class Agent: id, type, name, model
 class Change: sequence, timestamp, agent, operation, reason
 
-vAgendaInfo: vAgendaInfo("0.3")
+vContextInfo: vContextInfo("0.3")
 todoList: TodoList(
   "todo-002",
   [
@@ -1344,7 +1344,7 @@ todoList: TodoList(
 **JSON:**
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3"
   },
   "todoList": {
@@ -1482,12 +1482,12 @@ PlanItem {
 
 **TRON:**
 ```tron
-class vAgendaInfo: version
+class vContextInfo: version
 class Plan: id, title, status, narratives, uid, fork
 class Narrative: title, content
 class Fork: parentUid, parentSequence, forkedAt, forkReason, mergeStatus
 
-vAgendaInfo: vAgendaInfo("0.3")
+vContextInfo: vContextInfo("0.3")
 plan: Plan(
   "plan-fork-001",
   "Authentication - Alternative approach",
@@ -1507,7 +1507,7 @@ plan: Plan(
 **JSON:**
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3"
   },
   "plan": {
@@ -1534,7 +1534,7 @@ plan: Plan(
 
 ## Extension 12: Playbooks
 
-The Playbooks extension spec is in `vAgenda-extension-playbooks.md` (see that document for the full schema, invariants, merge semantics, and examples).
+The Playbooks extension spec is in `vContext-extension-playbooks.md` (see that document for the full schema, invariants, merge semantics, and examples).
 
 - **Requires**: Extension 2 (Identifiers)
 - **Recommended**: Extension 10 (Version Control & Sync)
@@ -1558,8 +1558,8 @@ For the complete TRON specification, see: https://tron-format.github.io/
 ### Core TRON Classes
 
 ```tron
-# vAgendaInfo (Core) - appears once per document at root level
-class vAgendaInfo: version
+# vContextInfo (Core) - appears once per document at root level
+class vContextInfo: version
 
 # TodoList (Core)
 class TodoList: items
@@ -1598,7 +1598,7 @@ Implementations define only the classes for extensions they support.
 | 9. Security | Core | None |
 | 10. Version Control | Identifiers | None |
 | 11. Forking | Version Control | None |
-|| 12. Playbooks (`vAgenda-extension-playbooks.md`) | Identifiers, Version Control | None |
+|| 12. Playbooks (`vContext-extension-playbooks.md`) | Identifiers, Version Control | None |
 
 ---
 
@@ -1665,7 +1665,7 @@ Implementation guidance:
 
 Tools should:
 - Read and write both JSON and TRON formats.
-- Validate against `vAgendaInfo.version`.
+- Validate against `vContextInfo.version`.
 - Preserve unknown fields during updates.
 - Generate unique IDs (UUIDs or similar) when using identifiers.
 - Update timestamps automatically when timestamp fields are present.
@@ -1714,7 +1714,7 @@ Editors should:
 - Use three-way merge for conflict detection
 
 ### Playbooks
-See `vAgenda-extension-playbooks.md` for playbooks best practices (e.g. grow-and-refine, evidence linking, dedup, and append-only `operation` entries).
+See `vContext-extension-playbooks.md` for playbooks best practices (e.g. grow-and-refine, evidence linking, dedup, and append-only `operation` entries).
 
 ---
 
@@ -1726,7 +1726,7 @@ These examples are intentionally "real-world" and include fields from **Core + E
 
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3",
     "author": "Platform Team",
     "description": "On-call followups for incident INC-2042",
@@ -1792,13 +1792,13 @@ These examples are intentionally "real-world" and include fields from **Core + E
         "description": "Primary incident record"
       },
       {
-        "uri": "file://./plans/payment-webhooks-plan.vagenda.json",
-        "type": "x-vagenda/plan",
+        "uri": "file://./plans/payment-webhooks-plan.vcontext.json",
+        "type": "x-vcontext/plan",
         "title": "Remediation plan"
       },
       {
-        "uri": "file://./playbooks/platform-reliability-playbook.vagenda.json",
-        "type": "x-vagenda/playbook",
+        "uri": "file://./playbooks/platform-reliability-playbook.vcontext.json",
+        "type": "x-vcontext/playbook",
         "title": "Reliability playbook"
       }
     ],
@@ -1880,7 +1880,7 @@ These examples are intentionally "real-world" and include fields from **Core + E
 
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3",
     "author": "Platform Team",
     "description": "Remediation plan for payment webhooks latency regression",
@@ -1978,8 +1978,8 @@ These examples are intentionally "real-world" and include fields from **Core + E
     },
 
     "references": [
-      {"uri": "file://./todo/inc-2042-todo.vagenda.json", "type": "x-vagenda/todoList", "title": "Execution checklist"},
-      {"uri": "file://./playbooks/platform-reliability-playbook.vagenda.json", "type": "x-vagenda/playbook", "title": "Reliability playbook"}
+      {"uri": "file://./todo/inc-2042-todo.vcontext.json", "type": "x-vcontext/todoList", "title": "Execution checklist"},
+      {"uri": "file://./playbooks/platform-reliability-playbook.vcontext.json", "type": "x-vcontext/playbook", "title": "Reliability playbook"}
     ],
 
     "uris": [
@@ -2061,7 +2061,7 @@ These examples are intentionally "real-world" and include fields from **Core + E
 
 ```json
 {
-  "vAgendaInfo": {
+  "vContextInfo": {
     "version": "0.3",
     "author": "Platform Team",
     "description": "Reliability practices for latency regressions and incident followups",
@@ -2151,8 +2151,8 @@ These examples are intentionally "real-world" and include fields from **Core + E
 This spec is intentionally iterative. The following open questions are candidates for future simplification or clarification.
 
 1. **Do we need separate `references` and `uris`?**
-   - Today: `uris` can point to anything (external URLs, files, other vAgenda documents), while `references` are vAgenda-only links.
-   - Alternative: remove `references` entirely and rely on `uris` + a constrained `type` set for vAgenda document linking.
+   - Today: `uris` can point to anything (external URLs, files, other vContext documents), while `references` are vContext-only links.
+   - Alternative: remove `references` entirely and rely on `uris` + a constrained `type` set for vContext document linking.
 
 2. **Can we combine `changeLog` and Playbook events into one concept?**
    - Today: `changeLog` records document edits (create/update/fork/merge), while Playbooks use append-only PlaybookItem events to evolve long-term guidance.

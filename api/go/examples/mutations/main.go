@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/visionik/vAgenda/api/go/pkg/builder"
-	"github.com/visionik/vAgenda/api/go/pkg/core"
-	"github.com/visionik/vAgenda/api/go/pkg/updater"
+	"github.com/visionik/vContext/api/go/pkg/builder"
+	"github.com/visionik/vContext/api/go/pkg/core"
+	"github.com/visionik/vContext/api/go/pkg/updater"
 )
 
 func main() {
-	fmt.Println("=== vAgenda Mutation API Demo ===")
+	fmt.Println("=== vContext Mutation API Demo ===")
 	fmt.Println()
 
 	// Direct mutations on TodoList

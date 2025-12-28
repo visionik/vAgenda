@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to vAgenda.
+Thanks for contributing to vContext.
 
 ## Development workflow
 

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/visionik/vAgenda/api/go/pkg/core"
+	"github.com/visionik/vContext/api/go/pkg/core"
 )
 
 func TestTodoQuery_ByTitle_CaseInsensitive(t *testing.T) {

@@ -1,4 +1,4 @@
-# vAgenda Extension Proposal: Go API Library
+# vContext Extension Proposal: Go API Library
 
 > **EARLY DRAFT**: This is an initial proposal and subject to change. Comments, feedback, and suggestions are strongly encouraged. Please provide input via GitHub issues or discussions.
 
@@ -10,10 +10,10 @@
 
 ## Overview
 
-This document describes a Go library implementation for working with vAgenda documents. The library provides idiomatic Go interfaces for creating, parsing, manipulating, and validating vAgenda TodoLists and Plans in both JSON and TRON formats.
+This document describes a Go library implementation for working with vContext documents. The library provides idiomatic Go interfaces for creating, parsing, manipulating, and validating vContext TodoLists and Plans in both JSON and TRON formats.
 
 The library enables:
-- **Type-safe operations** on vAgenda documents
+- **Type-safe operations** on vContext documents
 - **Format conversion** between JSON and TRON
 - **Validation** against core and extension schemas
 - **Builder patterns** for constructing complex documents
@@ -26,13 +26,13 @@ The library enables:
 - Go is widely used for CLI tools, agents, and backend services
 - Type safety prevents common errors when manipulating structured data
 - Standard library makes JSON handling straightforward
-- Go's simplicity aligns with vAgenda's design philosophy
-- Strong testing culture matches vAgenda's quality standards
+- Go's simplicity aligns with vContext's design philosophy
+- Strong testing culture matches vContext's quality standards
 
 **Use cases**:
 - Agentic systems written in Go (task orchestrators, memory systems)
-- CLI tools for managing vAgenda documents (`va` command)
-- Web services providing vAgenda APIs
+- CLI tools for managing vContext documents (`va` command)
+- Web services providing vContext APIs
 - Format converters and validators
 - Integration with other Go-based tools (Beads, etc.)
 
@@ -43,7 +43,7 @@ The library enables:
 The Go implementation currently lives inside this repo under `api/go`:
 
 ```
-github.com/visionik/vAgenda/api/go/
+github.com/visionik/vContext/api/go/
 ├── pkg/
 │   ├── core/           # Core types + mutation helpers
 │   ├── parser/         # JSON/TRON parsing (auto-detect supported)
@@ -66,10 +66,10 @@ Notes:
 ```go
 package core
 
-// Document represents the root vAgenda document.
+// Document represents the root vContext document.
 // A document contains metadata and either a TodoList or a Plan (but not both).
 type Document struct {
-    Info     Info      `json:"vAgendaInfo" tron:"vAgendaInfo"`
+    Info     Info      `json:"vContextInfo" tron:"vContextInfo"`
     TodoList *TodoList `json:"todoList,omitempty" tron:"todoList,omitempty"`
     Plan     *Plan     `json:"plan,omitempty" tron:"plan,omitempty"`
 }
@@ -182,7 +182,7 @@ The actual `builder` package is intentionally small and focused.
 ```go
 package builder
 
-import "github.com/visionik/vAgenda/api/go/pkg/core"
+import "github.com/visionik/vContext/api/go/pkg/core"
 
 // TodoList builder
 builder.NewTodoList(version string) *TodoListBuilder
@@ -221,7 +221,7 @@ builder.NewPlanWithStatus(version, title string, status core.PlanStatus) *PlanBu
 ```go
 package validator
 
-import "github.com/visionik/vAgenda/api/go/pkg/core"
+import "github.com/visionik/vContext/api/go/pkg/core"
 
 type Validator interface {
     Validate(doc *core.Document) error
@@ -241,7 +241,7 @@ func New() Validator // alias
 ```go
 package query
 
-import "github.com/visionik/vAgenda/api/go/pkg/core"
+import "github.com/visionik/vContext/api/go/pkg/core"
 
 query.NewTodoQuery(items []core.TodoItem) *TodoQuery
   .ByStatus(status core.ItemStatus)
@@ -264,7 +264,7 @@ package convert
 import (
     "io"
 
-    "github.com/visionik/vAgenda/api/go/pkg/core"
+    "github.com/visionik/vContext/api/go/pkg/core"
 )
 
 type Format string
@@ -320,7 +320,7 @@ Future work (not implemented today): a `va` CLI.
 
 ## Testing Strategy
 
-Following Go and vAgenda best practices:
+Following Go and vContext best practices:
 
 ### Unit Tests
 
@@ -340,10 +340,10 @@ import (
 
     "github.com/stretchr/testify/assert"
 
-    "github.com/visionik/vAgenda/api/go/pkg/builder"
-    "github.com/visionik/vAgenda/api/go/pkg/convert"
-    "github.com/visionik/vAgenda/api/go/pkg/parser"
-    "github.com/visionik/vAgenda/api/go/pkg/core"
+    "github.com/visionik/vContext/api/go/pkg/builder"
+    "github.com/visionik/vContext/api/go/pkg/convert"
+    "github.com/visionik/vContext/api/go/pkg/parser"
+    "github.com/visionik/vContext/api/go/pkg/core"
 )
 
 func TestRoundTrip_JSON(t *testing.T) {
@@ -420,7 +420,7 @@ Not implemented (still proposal-level):
 
 ## Standards and Compliance
 
-Following vAgenda project guidelines:
+Following vContext project guidelines:
 
 ### Code Quality
 - All exported symbols have godoc comments (complete sentences)
@@ -474,11 +474,11 @@ The repo is task-centric; the actual tasks are already implemented:
 
 ## References
 
-- vAgenda Specification: https://github.com/visionik/vAgenda
+- vContext Specification: https://github.com/visionik/vContext
 - Go Documentation: https://go.dev/doc/comment
 - TRON Format: https://tron-format.github.io/
 - Testify: https://github.com/stretchr/testify
-- vAgenda Beads Extension: [vAgenda-extension-beads.md](./vAgenda-extension-beads.md)
+- vContext Beads Extension: [vContext-extension-beads.md](./vContext-extension-beads.md)
 
 ## Community Feedback
 
@@ -490,4 +490,4 @@ This is a **draft proposal**. Feedback needed:
 4. Is the CLI command structure intuitive?
 5. What additional utilities would be valuable?
 
-**Discuss**: https://github.com/visionik/vAgenda/discussions
+**Discuss**: https://github.com/visionik/vContext/discussions

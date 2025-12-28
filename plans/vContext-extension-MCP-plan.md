@@ -1,13 +1,13 @@
-# Plan: vAgenda MCP (Model Context Protocol) Extension
+# Plan: vContext MCP (Model Context Protocol) Extension
 
 **Status**: Draft  
 **Author**: Jonathan Taylor (visionik@pobox.com)  
 **Created**: 2025-12-27  
-**Purpose**: Plan the structure and content for vAgenda-extension-MCP.md
+**Purpose**: Plan the structure and content for vContext-extension-MCP.md
 
 ## Overview
 
-Create a vAgenda extension proposal for Model Context Protocol (MCP) integration. MCP is Anthropic's open protocol that enables AI models to securely connect to external data sources and tools. This extension would define how vAgenda documents are exposed as MCP resources and how vAgenda operations are exposed as MCP tools.
+Create a vContext extension proposal for Model Context Protocol (MCP) integration. MCP is Anthropic's open protocol that enables AI models to securely connect to external data sources and tools. This extension would define how vContext documents are exposed as MCP resources and how vContext operations are exposed as MCP tools.
 
 ## Context
 
@@ -17,10 +17,10 @@ Create a vAgenda extension proposal for Model Context Protocol (MCP) integration
 - Supported by Claude, and increasingly by other AI systems
 - Enables secure, consistent data access across different AI applications
 
-**Why vAgenda needs MCP integration:**
-- Makes vAgenda documents natively accessible to Claude and other LLM-based agents
-- Standardizes how tools read/write vAgenda (vs custom implementations)
-- Enables discovery - agents can find vAgenda servers automatically
+**Why vContext needs MCP integration:**
+- Makes vContext documents natively accessible to Claude and other LLM-based agents
+- Standardizes how tools read/write vContext (vs custom implementations)
+- Enables discovery - agents can find vContext servers automatically
 - Provides security/permission model for multi-user scenarios
 
 **Relationship to existing extensions:**
@@ -39,8 +39,8 @@ Create a vAgenda extension proposal for Model Context Protocol (MCP) integration
 
 ### 2. Overview
 - Brief explanation of MCP (with link to spec)
-- How MCP enables AI agents to access vAgenda
-- Integration goal: Make vAgenda a first-class MCP resource type
+- How MCP enables AI agents to access vContext
+- Integration goal: Make vContext a first-class MCP resource type
 
 ### 3. Motivation
 **MCP strengths:**
@@ -49,8 +49,8 @@ Create a vAgenda extension proposal for Model Context Protocol (MCP) integration
 - Security/authentication built-in
 - Transport agnostic (stdio, SSE, HTTP)
 
-**vAgenda benefits from MCP:**
-- AI agents can discover and use vAgenda without custom code
+**vContext benefits from MCP:**
+- AI agents can discover and use vContext without custom code
 - Standardized CRUD operations on todos/plans/playbooks
 - Real-time updates (vs polling files)
 - Multi-user coordination with permissions
@@ -58,60 +58,60 @@ Create a vAgenda extension proposal for Model Context Protocol (MCP) integration
 ### 4. Dependencies
 **Required:**
 - Extension 2 (Identifiers) - for referencing specific items
-- Core vAgenda types
+- Core vContext types
 
 **Recommended:**
 - Extension 10 (Version Control) - change tracking
 - Extension 11 (Forking) - for conflict resolution
 
-### 5. MCP Resources (How vAgenda is exposed)
+### 5. MCP Resources (How vContext is exposed)
 
-Define vAgenda as MCP resources:
+Define vContext as MCP resources:
 
 ```typescript
-// Resources expose vAgenda documents
+// Resources expose vContext documents
 resources: [
   {
-    uri: "vagenda://todos/current",
+    uri: "vcontext://todos/current",
     name: "Current Tasks",
     mimeType: "text/x-tron"
   },
   {
-    uri: "vagenda://plans/{id}",
+    uri: "vcontext://plans/{id}",
     name: "Plan by ID",
     mimeType: "text/x-tron"
   },
   {
-    uri: "vagenda://playbook",
+    uri: "vcontext://playbook",
     name: "Project Playbook",
     mimeType: "text/x-tron"
   }
 ]
 ```
 
-### 6. MCP Tools (How vAgenda is modified)
+### 6. MCP Tools (How vContext is modified)
 
-Define vAgenda operations as MCP tools:
+Define vContext operations as MCP tools:
 
 ```typescript
 tools: [
   {
-    name: "vagenda_create_todo",
+    name: "vcontext_create_todo",
     description: "Create a new todo item",
     inputSchema: { /* JSON schema */ }
   },
   {
-    name: "vagenda_update_todo",
+    name: "vcontext_update_todo",
     description: "Update todo status/content",
     inputSchema: { /* JSON schema */ }
   },
   {
-    name: "vagenda_create_plan",
+    name: "vcontext_create_plan",
     description: "Create a new plan document",
     inputSchema: { /* JSON schema */ }
   },
   {
-    name: "vagenda_add_learning",
+    name: "vcontext_add_learning",
     description: "Add learning to playbook",
     inputSchema: { /* JSON schema */ }
   }
@@ -120,18 +120,18 @@ tools: [
 
 ### 7. MCP Prompts (Optional)
 
-Predefined prompt templates for common vAgenda workflows:
+Predefined prompt templates for common vContext workflows:
 
 ```typescript
 prompts: [
   {
-    name: "vagenda_session_start",
-    description: "Load vAgenda context at session start",
+    name: "vcontext_session_start",
+    description: "Load vContext context at session start",
     arguments: []
   },
   {
-    name: "vagenda_session_end",
-    description: "Save vAgenda state at session end",
+    name: "vcontext_session_end",
+    description: "Save vContext state at session end",
     arguments: []
   }
 ]
@@ -140,19 +140,19 @@ prompts: [
 ### 8. Usage Patterns
 
 #### Pattern 1: MCP Server Discovery
-Show how AI agents discover and connect to vAgenda MCP server
+Show how AI agents discover and connect to vContext MCP server
 
-#### Pattern 2: Reading vAgenda via Resources
+#### Pattern 2: Reading vContext via Resources
 Examples of agents reading current todos, plans, playbooks
 
-#### Pattern 3: Modifying vAgenda via Tools
+#### Pattern 3: Modifying vContext via Tools
 Examples of agents creating/updating items through MCP tools
 
 #### Pattern 4: Real-Time Collaboration
-Multiple agents/users working on shared vAgenda through MCP
+Multiple agents/users working on shared vContext through MCP
 
 #### Pattern 5: Integration with Claude Desktop
-Specific example of Claude Desktop app using vAgenda MCP server
+Specific example of Claude Desktop app using vContext MCP server
 
 ### 9. Implementation Notes
 
@@ -163,7 +163,7 @@ Specific example of Claude Desktop app using vAgenda MCP server
 - Authentication/authorization considerations
 
 #### Client Usage
-- How AI agents connect to vAgenda MCP server
+- How AI agents connect to vContext MCP server
 - Configuration examples for different tools
 - Error handling and fallbacks
 
@@ -196,7 +196,7 @@ Full JSON schemas for:
 
 1. Should MCP server support both TRON and JSON, or TRON only?
 2. How to handle large playbooks that exceed MCP message size limits?
-3. Should vAgenda MCP server be mandatory or optional?
+3. Should vContext MCP server be mandatory or optional?
 4. How to handle offline scenarios (MCP requires server connection)?
 
 ### 14. Examples
@@ -228,14 +228,14 @@ Phase 3: Ecosystem integration
 
 Questions for community:
 - What MCP transports are most important?
-- Should server handle multiple vAgenda projects?
+- Should server handle multiple vContext projects?
 - What permission model makes sense?
 
 ### 17. References
 
 - MCP specification: https://modelcontextprotocol.io
 - MCP SDK: https://github.com/modelcontextprotocol/sdk
-- vAgenda spec
+- vContext spec
 - Claude extension (references MCP)
 
 ## Key Differentiators from Claude Extension
@@ -247,13 +247,13 @@ The Claude extension showed a brief MCP example but didn't:
 - Address security/multi-user
 - Show non-Claude MCP clients
 
-This extension should be **comprehensive and protocol-focused**, serving as the reference for anyone implementing vAgenda MCP support.
+This extension should be **comprehensive and protocol-focused**, serving as the reference for anyone implementing vContext MCP support.
 
 ## Technical Decisions Needed
 
 ### 1. Resource URI Scheme
-Option A: `vagenda://todos/current`, `vagenda://plans/{id}`
-Option B: `file:///path/to/vAgenda/current.tron`
+Option A: `vcontext://todos/current`, `vcontext://plans/{id}`
+Option B: `file:///path/to/vContext/current.tron`
 Option C: Both supported
 
 **Recommendation**: Option A (custom scheme) for abstraction, with server handling file mapping internally.
@@ -282,9 +282,9 @@ What happens when two clients modify same todo?
 ## Success Criteria
 
 The extension document should enable:
-1. Developer can implement vAgenda MCP server from spec
-2. AI agent can discover and use vAgenda MCP server
-3. Multiple clients can coordinate through vAgenda MCP
+1. Developer can implement vContext MCP server from spec
+2. AI agent can discover and use vContext MCP server
+3. Multiple clients can coordinate through vContext MCP
 4. Clear migration path from file-based to MCP-based access
 
 ## Next Steps

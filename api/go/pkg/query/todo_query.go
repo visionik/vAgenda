@@ -1,10 +1,10 @@
-// Package query provides filtering and querying capabilities for vAgenda documents.
+// Package query provides filtering and querying capabilities for vContext documents.
 package query
 
 import (
 	"strings"
 
-	"github.com/visionik/vAgenda/api/go/pkg/core"
+	"github.com/visionik/vContext/api/go/pkg/core"
 )
 
 // TodoQuery provides filtering for TodoItems.
