@@ -1448,6 +1448,13 @@ This spec is intentionally iterative. The following open questions are candidate
    - Alternative naming: TaskList/Task, WorkList/WorkItem, ActionList/Action.
    - Consideration: changing now would be a breaking change; however, TodoItem could be aliased to Task for familiarity.
 
+15. **Should we use 'namespaced' extensions in the JSON/TRON?**
+   - Today: Extension fields are added directly to core types (flat structure), making it unclear which fields come from which extension.
+   - Alternative: Group all extension fields within their own nested objects (e.g., `time`, `identity`, `meta`) for clear namespace separation.
+   - Benefits: Clearer field ownership, easier feature detection, no naming conflicts, simpler validation.
+   - Costs: 10-15% token increase in JSON, breaking change requiring migration, more complex access patterns.
+   - See `vContext-alternative-namespaced.md` for detailed analysis and examples.
+
 ---
 
 # Appendix C: License
