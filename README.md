@@ -2166,6 +2166,10 @@ This spec is intentionally iterative. The following open questions are candidate
    - Today: `changeLog` records document edits (create/update/fork/merge), while Playbooks use append-only PlaybookItem events to evolve long-term guidance.
    - Alternative: unify into a single append-only event log model with different event kinds/scopes (document mutation vs knowledge evolution), reducing duplicated machinery.
 
+3. **Do we need recurring & reminders at all?**
+   - Today: Extension 8 adds `recurrence` and `reminders` to support calendar-like automation.
+   - Alternative: remove Extension 8 from core scope and rely on external scheduling systems + `uris` to link to them.
+
 ---
 
 # Appendix C: License
