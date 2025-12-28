@@ -1251,6 +1251,16 @@ TodoItem(
 
 Adds cross-system sync and conflict resolution.
 
+### Sequence: intended semantics
+
+When present, `sequence` is a **revision counter** for a TodoList/Plan (and optionally for individual items) used for multi-writer safety.
+
+- Producers SHOULD increment the container’s `sequence` on every change to the document.
+- `sequence` MUST be monotonically non-decreasing.
+- Consumers MAY use `sequence` for **optimistic concurrency** ("apply update only if sequence is still N").
+- When combined with `changeLog` (and optional `snapshotUri`), `sequence` provides an audit-friendly way to refer to prior revisions.
+- With Extension 11 (Forking), `fork.parentSequence` can be compared to the parent’s current `sequence` to detect parallel edits before merging.
+
 ### New Types
 ```javascript
 Agent {
