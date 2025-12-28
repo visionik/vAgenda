@@ -49,39 +49,39 @@ func (d *Document) GetTodoItems() []TodoItem {
 	return d.TodoList.Items
 }
 
-// AddPhase adds a new phase to the Plan.
-func (d *Document) AddPhase(phase Phase) error {
+// AddPlanItem adds a new plan item to the Plan.
+func (d *Document) AddPlanItem(item PlanItem) error {
 	if d.Plan == nil {
 		return ErrNoPlan
 	}
-	d.Plan.Phases = append(d.Plan.Phases, phase)
+	d.Plan.Items = append(d.Plan.Items, item)
 	return nil
 }
 
-// UpdatePhase updates an existing phase at the specified index.
-func (d *Document) UpdatePhase(index int, phase Phase) error {
-	if d.Plan == nil || index < 0 || index >= len(d.Plan.Phases) {
+// UpdatePlanItem updates an existing plan item at the specified index.
+func (d *Document) UpdatePlanItem(index int, item PlanItem) error {
+	if d.Plan == nil || index < 0 || index >= len(d.Plan.Items) {
 		return ErrInvalidIndex
 	}
-	d.Plan.Phases[index] = phase
+	d.Plan.Items[index] = item
 	return nil
 }
 
-// UpdatePhaseStatus updates the status of a phase at the specified index.
-func (d *Document) UpdatePhaseStatus(index int, status PhaseStatus) error {
-	if d.Plan == nil || index < 0 || index >= len(d.Plan.Phases) {
+// UpdatePlanItemStatus updates the status of a plan item at the specified index.
+func (d *Document) UpdatePlanItemStatus(index int, status PlanItemStatus) error {
+	if d.Plan == nil || index < 0 || index >= len(d.Plan.Items) {
 		return ErrInvalidIndex
 	}
-	d.Plan.Phases[index].Status = status
+	d.Plan.Items[index].Status = status
 	return nil
 }
 
-// RemovePhase removes a phase at the specified index.
-func (d *Document) RemovePhase(index int) error {
-	if d.Plan == nil || index < 0 || index >= len(d.Plan.Phases) {
+// RemovePlanItem removes a plan item at the specified index.
+func (d *Document) RemovePlanItem(index int) error {
+	if d.Plan == nil || index < 0 || index >= len(d.Plan.Items) {
 		return ErrInvalidIndex
 	}
-	d.Plan.Phases = append(d.Plan.Phases[:index], d.Plan.Phases[index+1:]...)
+	d.Plan.Items = append(d.Plan.Items[:index], d.Plan.Items[index+1:]...)
 	return nil
 }
 
@@ -115,12 +115,12 @@ func (d *Document) UpdatePlanStatus(status PlanStatus) error {
 	return nil
 }
 
-// GetPhases returns all phases (nil-safe).
-func (d *Document) GetPhases() []Phase {
+// GetPlanItems returns all plan items (nil-safe).
+func (d *Document) GetPlanItems() []PlanItem {
 	if d.Plan == nil {
 		return nil
 	}
-	return d.Plan.Phases
+	return d.Plan.Items
 }
 
 // GetNarratives returns all narratives (nil-safe).

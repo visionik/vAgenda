@@ -227,9 +227,9 @@ func TestValidator_ValidatePhases(t *testing.T) {
 				Narratives: map[string]core.Narrative{
 					"proposal": {Title: "Proposal", Content: "Content"},
 				},
-				Phases: []core.Phase{
-					{Title: "Phase 1", Status: core.PhaseStatusPending},
-					{Title: "Phase 2", Status: core.PhaseStatusInProgress},
+				Items: []core.PlanItem{
+					{Title: "Phase 1", Status: core.PlanItemStatusPending},
+					{Title: "Phase 2", Status: core.PlanItemStatusInProgress},
 				},
 			},
 		}
@@ -247,15 +247,15 @@ func TestValidator_ValidatePhases(t *testing.T) {
 				Narratives: map[string]core.Narrative{
 					"proposal": {Title: "Proposal", Content: "Content"},
 				},
-				Phases: []core.Phase{
-					{Title: "", Status: core.PhaseStatusPending},
+				Items: []core.PlanItem{
+					{Title: "", Status: core.PlanItemStatusPending},
 				},
 			},
 		}
 
 		err := v.Validate(doc)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "phases[0]")
+		assert.Contains(t, err.Error(), "items[0]")
 		assert.Contains(t, err.Error(), "title is required")
 	})
 
@@ -268,8 +268,8 @@ func TestValidator_ValidatePhases(t *testing.T) {
 				Narratives: map[string]core.Narrative{
 					"proposal": {Title: "Proposal", Content: "Content"},
 				},
-				Phases: []core.Phase{
-					{Title: "Phase", Status: core.PhaseStatus("invalid")},
+				Items: []core.PlanItem{
+					{Title: "Phase", Status: core.PlanItemStatus("invalid")},
 				},
 			},
 		}

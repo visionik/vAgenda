@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	doc := &core.Document{Info: core.Info{Version: "0.2"}, TodoList: &core.TodoList{Items: []core.TodoItem{}}}
+	doc := &core.Document{Info: core.Info{Version: "0.4"}, TodoList: &core.TodoList{Items: []core.TodoItem{}}}
 
 	fmt.Println("=== strict error behavior demo ===")
 

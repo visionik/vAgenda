@@ -204,9 +204,9 @@ func (v *validator) validatePlan(plan *core.Plan) ValidationErrors {
 		}
 	}
 
-	// Validate phases
-	for i, phase := range plan.Phases {
-		if errs := v.validatePhase(phase, i); len(errs) > 0 {
+	// Validate plan items
+	for i, item := range plan.Items {
+		if errs := v.validatePlanItem(item, i); len(errs) > 0 {
 			errors = append(errors, errs...)
 		}
 	}
@@ -214,21 +214,21 @@ func (v *validator) validatePlan(plan *core.Plan) ValidationErrors {
 	return errors
 }
 
-func (v *validator) validatePhase(phase core.Phase, index int) ValidationErrors {
+func (v *validator) validatePlanItem(item core.PlanItem, index int) ValidationErrors {
 	var errors ValidationErrors
-	prefix := fmt.Sprintf("plan.phases[%d]", index)
+	prefix := fmt.Sprintf("plan.items[%d]", index)
 
-	if phase.Title == "" {
+	if item.Title == "" {
 		errors = append(errors, ValidationError{
 			Field:   prefix + ".title",
 			Message: "title is required",
 		})
 	}
 
-	if !phase.Status.IsValid() {
+	if !item.Status.IsValid() {
 		errors = append(errors, ValidationError{
 			Field:   prefix + ".status",
-			Message: fmt.Sprintf("invalid status: %s", phase.Status),
+			Message: fmt.Sprintf("invalid status: %s", item.Status),
 		})
 	}
 

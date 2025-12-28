@@ -183,7 +183,7 @@ class Narrative(BaseModel):
 class PlanItem(BaseModel):
     """Stage of work within a plan."""
     title: str = Field(description="PlanItem name")
-    status: PhaseStatus = Field(description="Current status")
+    status: PlanItemStatus = Field(description="Current status")
 
     class Config:
         extra = "allow"
@@ -196,6 +196,10 @@ class Plan(BaseModel):
     narratives: Dict[str, Narrative] = Field(
         default_factory=dict,
         description="Named narrative blocks"
+    )
+    items: List[PlanItem] = Field(
+        default_factory=list,
+        description="Plan items"
     )
 
     class Config:
@@ -229,7 +233,7 @@ class VAgendaDocument:
         self._data = data
 
     @classmethod
-    def create_todo_list(cls, version: str = "0.2") -> "VAgendaDocument":
+    def create_todo_list(cls, version: str = "0.4") -> "VAgendaDocument":
         """Create a new TodoList document."""
         doc = Document(
             vContextInfo=Info(version=version),
@@ -238,7 +242,7 @@ class VAgendaDocument:
         return cls(doc)
 
     @classmethod
-    def create_plan(cls, title: str, version: str = "0.2") -> "VAgendaDocument":
+    def create_plan(cls, title: str, version: str = "0.4") -> "VAgendaDocument":
         """Create a new Plan document."""
         doc = Document(
             vContextInfo=Info(version=version),
@@ -354,7 +358,7 @@ from ..core.types import Document, Info, TodoList, TodoItem, ItemStatus
 class TodoListBuilder:
     """Fluent builder for TodoList documents."""
     
-    def __init__(self, version: str = "0.2"):
+    def __init__(self, version: str = "0.4"):
         self._info = Info(version=version)
         self._items: List[TodoItem] = []
 
@@ -404,7 +408,7 @@ from ..core.types import Document, Info, Plan, Narrative, PlanStatus
 class PlanBuilder:
     """Fluent builder for Plan documents."""
     
-    def __init__(self, title: str, version: str = "0.2"):
+    def __init__(self, title: str, version: str = "0.4"):
         self._info = Info(version=version)
         self._plan = Plan(
             title=title,
@@ -461,12 +465,12 @@ class PlanBuilder:
 
 
 # Convenience functions
-def todo(version: str = "0.2") -> TodoListBuilder:
+def todo(version: str = "0.4") -> TodoListBuilder:
     """Create a TodoList builder."""
     return TodoListBuilder(version)
 
 
-def plan(title: str, version: str = "0.2") -> PlanBuilder:
+def plan(title: str, version: str = "0.4") -> PlanBuilder:
     """Create a Plan builder."""
     return PlanBuilder(title, version)
 ```
@@ -1120,7 +1124,7 @@ class TodoListWithMetadata(CoreTodoList):
 from vcontext import todo, VAgendaDocument, ItemStatus
 
 # Using builder
-doc = (todo("0.2")
+doc = (todo("0.4")
     .author("agent-alpha")
     .add_item("Implement authentication", ItemStatus.PENDING)
     .add_item("Write API documentation", ItemStatus.PENDING)
@@ -1161,7 +1165,7 @@ for item in query(doc.todo_list.items).by_status(ItemStatus.PENDING):
 ```python
 from vcontext import plan, PlanStatus
 
-doc = (plan("Add user authentication", "0.2")
+doc = (plan("Add user authentication", "0.4")
     .status(PlanStatus.DRAFT)
     .proposal(
         "Proposed Changes",
@@ -1527,7 +1531,7 @@ from vcontext import todo, ItemStatus
 from vcontext.updater import create_updater
 
 # Create initial document
-initial_doc = todo("0.2").add_item("Task 1", ItemStatus.PENDING).build()
+initial_doc = todo("0.4").add_item("Task 1", ItemStatus.PENDING).build()
 
 # Perform multiple updates atomically
 updater = create_updater(initial_doc)
@@ -1562,7 +1566,7 @@ else:
 pip install vcontext
 
 # Create a new TodoList
-vcontext create todo --version 0.2 --output tasks.tron
+vcontext create todo --version 0.4 --output tasks.tron
 
 # Add an item
 vcontext add item tasks.tron "Implement auth" --status pending
@@ -1606,18 +1610,18 @@ import pytest
 from vcontext import todo, ItemStatus
 
 def test_todo_builder_creates_valid_document():
-    doc = (todo("0.2")
+    doc = (todo("0.4")
         .author("test-author")
         .add_item("Task 1", ItemStatus.PENDING)
         .build_document())
     
-    assert doc.data.vContextInfo.version == "0.2"
+    assert doc.data.vContextInfo.version == "0.4"
     assert doc.data.vContextInfo.author == "test-author"
     assert len(doc.todo_list.items) == 1
     assert doc.todo_list.items[0].title == "Task 1"
 
 def test_todo_builder_supports_chaining():
-    builder = todo("0.2")
+    builder = todo("0.4")
     result = (builder
         .author("author")
         .add_item("Item 1")
@@ -1644,7 +1648,7 @@ import pytest
 from vcontext import todo, VAgendaDocument, ItemStatus
 
 def test_json_round_trip():
-    original = (todo("0.2")
+    original = (todo("0.4")
         .add_item("Task 1", ItemStatus.PENDING)
         .build_document())
     
@@ -1655,7 +1659,7 @@ def test_json_round_trip():
     assert json_str == reparsed_json
 
 def test_tron_round_trip():
-    original = (todo("0.2")
+    original = (todo("0.4")
         .add_item("Task 1", ItemStatus.PENDING)
         .build_document())
     
@@ -1666,7 +1670,7 @@ def test_tron_round_trip():
     assert tron_str == reparsed_tron
 
 def test_json_to_tron_conversion():
-    doc = todo("0.2").add_item("Task").build_document()
+    doc = todo("0.4").add_item("Task").build_document()
     
     json_str = doc.to_json()
     tron_str = doc.to_tron()

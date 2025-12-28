@@ -1,4 +1,4 @@
-# vContext Specification v0.3
+# vContext Specification v0.4
 
 > **DRAFT SPECIFICATION**: This document is a draft and subject to change. Feedback, suggestions, and contributions from the community are highly encouraged. Please submit input via GitHub issues or pull requests.
 

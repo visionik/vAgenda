@@ -40,9 +40,9 @@ func TestDocument_TodoListMutators(t *testing.T) {
 }
 
 func TestDocument_PlanMutators(t *testing.T) {
-	t.Run("AddPhase errors with no plan", func(t *testing.T) {
+	t.Run("AddPlanItem errors with no plan", func(t *testing.T) {
 		d := &Document{Info: Info{Version: "0.2"}}
-		err := d.AddPhase(Phase{Title: "p1", Status: PhaseStatusPending})
+		err := d.AddPlanItem(PlanItem{Title: "p1", Status: PlanItemStatusPending})
 		assert.ErrorIs(t, err, ErrNoPlan)
 	})
 

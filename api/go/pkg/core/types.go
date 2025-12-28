@@ -76,7 +76,7 @@ type Plan struct {
 	Title      string               `json:"title" tron:"title"`
 	Status     PlanStatus           `json:"status" tron:"status"`
 	Narratives map[string]Narrative `json:"narratives" tron:"narratives"`
-	Phases     []Phase              `json:"phases,omitempty" tron:"phases,omitempty"`
+	Items      []PlanItem           `json:"items,omitempty" tron:"items,omitempty"`
 }
 
 // PlanStatus represents the status of a plan.
@@ -108,33 +108,33 @@ func (s PlanStatus) IsValid() bool {
 	}
 }
 
-// Phase represents a stage of work within a plan.
-type Phase struct {
-	Title  string      `json:"title" tron:"title"`
-	Status PhaseStatus `json:"status" tron:"status"`
+// PlanItem represents a stage of work within a plan.
+type PlanItem struct {
+	Title  string          `json:"title" tron:"title"`
+	Status PlanItemStatus `json:"status" tron:"status"`
 }
 
-// PhaseStatus represents the status of a phase.
-type PhaseStatus string
+// PlanItemStatus represents the status of a plan item.
+type PlanItemStatus string
 
 const (
-	// PhaseStatusPending indicates the phase has not been started.
-	PhaseStatusPending PhaseStatus = "pending"
-	// PhaseStatusInProgress indicates the phase is currently active.
-	PhaseStatusInProgress PhaseStatus = "inProgress"
-	// PhaseStatusCompleted indicates the phase has been finished.
-	PhaseStatusCompleted PhaseStatus = "completed"
-	// PhaseStatusBlocked indicates the phase cannot proceed.
-	PhaseStatusBlocked PhaseStatus = "blocked"
-	// PhaseStatusCancelled indicates the phase has been cancelled.
-	PhaseStatusCancelled PhaseStatus = "cancelled"
+	// PlanItemStatusPending indicates the plan item has not been started.
+	PlanItemStatusPending PlanItemStatus = "pending"
+	// PlanItemStatusInProgress indicates the plan item is currently active.
+	PlanItemStatusInProgress PlanItemStatus = "inProgress"
+	// PlanItemStatusCompleted indicates the plan item has been finished.
+	PlanItemStatusCompleted PlanItemStatus = "completed"
+	// PlanItemStatusBlocked indicates the plan item cannot proceed.
+	PlanItemStatusBlocked PlanItemStatus = "blocked"
+	// PlanItemStatusCancelled indicates the plan item has been cancelled.
+	PlanItemStatusCancelled PlanItemStatus = "cancelled"
 )
 
-// IsValid returns true if the PhaseStatus is a valid value.
-func (s PhaseStatus) IsValid() bool {
+// IsValid returns true if the PlanItemStatus is a valid value.
+func (s PlanItemStatus) IsValid() bool {
 	switch s {
-	case PhaseStatusPending, PhaseStatusInProgress, PhaseStatusCompleted,
-		PhaseStatusBlocked, PhaseStatusCancelled:
+	case PlanItemStatusPending, PlanItemStatusInProgress, PlanItemStatusCompleted,
+		PlanItemStatusBlocked, PlanItemStatusCancelled:
 		return true
 	default:
 		return false
@@ -208,25 +208,25 @@ func (p *Plan) UpdateNarrative(key string, updates func(*Narrative)) error {
 	return nil
 }
 
-// AddPhase adds a phase to the Plan.
-func (p *Plan) AddPhase(phase Phase) {
-	p.Phases = append(p.Phases, phase)
+// AddPlanItem adds a plan item to the Plan.
+func (p *Plan) AddPlanItem(item PlanItem) {
+	p.Items = append(p.Items, item)
 }
 
-// RemovePhase removes a phase at the specified index.
-func (p *Plan) RemovePhase(index int) error {
-	if index < 0 || index >= len(p.Phases) {
-		return fmt.Errorf("%w: index=%d len=%d", ErrInvalidIndex, index, len(p.Phases))
+// RemovePlanItem removes a plan item at the specified index.
+func (p *Plan) RemovePlanItem(index int) error {
+	if index < 0 || index >= len(p.Items) {
+		return fmt.Errorf("%w: index=%d len=%d", ErrInvalidIndex, index, len(p.Items))
 	}
-	p.Phases = append(p.Phases[:index], p.Phases[index+1:]...)
+	p.Items = append(p.Items[:index], p.Items[index+1:]...)
 	return nil
 }
 
-// UpdatePhase applies updates to a phase at the specified index.
-func (p *Plan) UpdatePhase(index int, updates func(*Phase)) error {
-	if index < 0 || index >= len(p.Phases) {
-		return fmt.Errorf("%w: index=%d len=%d", ErrInvalidIndex, index, len(p.Phases))
+// UpdatePlanItem applies updates to a plan item at the specified index.
+func (p *Plan) UpdatePlanItem(index int, updates func(*PlanItem)) error {
+	if index < 0 || index >= len(p.Items) {
+		return fmt.Errorf("%w: index=%d len=%d", ErrInvalidIndex, index, len(p.Items))
 	}
-	updates(&p.Phases[index])
+	updates(&p.Items[index])
 	return nil
 }

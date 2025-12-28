@@ -140,51 +140,51 @@ func TestPlanUpdateNarrative(t *testing.T) {
 	assert.ErrorIs(t, err, ErrNarrativeNotFound)
 }
 
-func TestPlanAddPhase(t *testing.T) {
+func TestPlanAddPlanItem(t *testing.T) {
 	plan := &Plan{}
-	phase := Phase{Title: "Phase 1", Status: PhaseStatusPending}
+	phase := PlanItem{Title: "Phase 1", Status: PlanItemStatusPending}
 
-	plan.AddPhase(phase)
+	plan.AddPlanItem(phase)
 
-	assert.Len(t, plan.Phases, 1)
-	assert.Equal(t, "Phase 1", plan.Phases[0].Title)
+	assert.Len(t, plan.Items, 1)
+	assert.Equal(t, "Phase 1", plan.Items[0].Title)
 }
 
-func TestPlanRemovePhase(t *testing.T) {
+func TestPlanRemovePlanItem(t *testing.T) {
 	plan := &Plan{
-		Phases: []Phase{
-			{Title: "Phase 1", Status: PhaseStatusPending},
-			{Title: "Phase 2", Status: PhaseStatusPending},
+		Items: []PlanItem{
+			{Title: "Phase 1", Status: PlanItemStatusPending},
+			{Title: "Phase 2", Status: PlanItemStatusPending},
 		},
 	}
 
-	err := plan.RemovePhase(0)
+	err := plan.RemovePlanItem(0)
 	require.NoError(t, err)
-	assert.Len(t, plan.Phases, 1)
-	assert.Equal(t, "Phase 2", plan.Phases[0].Title)
+	assert.Len(t, plan.Items, 1)
+	assert.Equal(t, "Phase 2", plan.Items[0].Title)
 
 	// Invalid index
-	err = plan.RemovePhase(5)
+	err = plan.RemovePlanItem(5)
 	assert.ErrorIs(t, err, ErrInvalidIndex)
 }
 
-func TestPlanUpdatePhase(t *testing.T) {
+func TestPlanUpdatePlanItem(t *testing.T) {
 	plan := &Plan{
-		Phases: []Phase{
-			{Title: "Phase 1", Status: PhaseStatusPending},
+		Items: []PlanItem{
+			{Title: "Phase 1", Status: PlanItemStatusPending},
 		},
 	}
 
-	err := plan.UpdatePhase(0, func(p *Phase) {
-		p.Status = PhaseStatusCompleted
+	err := plan.UpdatePlanItem(0, func(p *PlanItem) {
+		p.Status = PlanItemStatusCompleted
 		p.Title = "Phase 1 Updated"
 	})
 
 	require.NoError(t, err)
-	assert.Equal(t, PhaseStatusCompleted, plan.Phases[0].Status)
-	assert.Equal(t, "Phase 1 Updated", plan.Phases[0].Title)
+	assert.Equal(t, PlanItemStatusCompleted, plan.Items[0].Status)
+	assert.Equal(t, "Phase 1 Updated", plan.Items[0].Title)
 
 	// Invalid index
-	err = plan.UpdatePhase(5, func(p *Phase) {})
+	err = plan.UpdatePlanItem(5, func(p *PlanItem) {})
 	assert.ErrorIs(t, err, ErrInvalidIndex)
 }

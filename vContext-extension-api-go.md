@@ -105,7 +105,7 @@ type Plan struct {
     Title      string               `json:"title" tron:"title"`
     Status     PlanStatus           `json:"status" tron:"status"`
     Narratives map[string]Narrative `json:"narratives" tron:"narratives"`
-    Phases     []PlanItem              `json:"items,omitempty" tron:"items,omitempty"`
+    Items      []PlanItem           `json:"items,omitempty" tron:"items,omitempty"`
 }
 
 // PlanStatus represents plan status
@@ -122,19 +122,19 @@ const (
 
 // PlanItem represents a stage of work within a plan
 type PlanItem struct {
-    Title  string      `json:"title" tron:"title"`
-    Status PhaseStatus `json:"status" tron:"status"`
+    Title  string         `json:"title" tron:"title"`
+    Status PlanItemStatus `json:"status" tron:"status"`
 }
 
-// PhaseStatus represents phase status
+// PlanItemStatus represents plan item status
 type PlanItemStatus string
 
 const (
-    PhaseStatusPending    PhaseStatus = "pending"
-    PhaseStatusInProgress PhaseStatus = "inProgress"
-    PhaseStatusCompleted  PhaseStatus = "completed"
-    PhaseStatusBlocked    PhaseStatus = "blocked"
-    PhaseStatusCancelled  PhaseStatus = "cancelled"
+    PlanItemStatusPending    PlanItemStatus = "pending"
+    PlanItemStatusInProgress PlanItemStatus = "inProgress"
+    PlanItemStatusCompleted  PlanItemStatus = "completed"
+    PlanItemStatusBlocked    PlanItemStatus = "blocked"
+    PlanItemStatusCancelled  PlanItemStatus = "cancelled"
 )
 
 // Narrative represents a named documentation block
@@ -206,10 +206,10 @@ builder.NewPlan(title, version string) *PlanBuilder
   .WithAlternatives(title, content string)
   .WithRisks(title, content string)
   .WithTesting(title, content string)
-  .AddPhase(title string, status core.PlanItemStatus)
-  .AddPendingPhase(title string)
-  .AddInProgressPhase(title string)
-  .AddCompletedPhase(title string)
+  .AddPlanItem(title string, status core.PlanItemStatus)
+  .AddPendingPlanItem(title string)
+  .AddInProgressPlanItem(title string)
+  .AddCompletedPlanItem(title string)
   .Build() *core.Document
 
 // If you need explicit status at creation time:
@@ -294,8 +294,8 @@ There are two mutation styles implemented today:
 
 1) **Direct mutations on core types** (no automatic validation)
 - `(*core.TodoList).AddItem`, `RemoveItem`, `UpdateItem`, `FindItem`
-- `(*core.Plan).AddNarrative`, `RemoveNarrative`, `UpdateNarrative`, `AddPhase`, `RemovePhase`, `UpdatePhase`
-- Convenience methods on `*core.Document` for common operations (e.g. `AddTodoItem`, `UpdateTodoItemStatus`, `AddPhase`, `AddNarrative`)
+- `(*core.Plan).AddNarrative`, `RemoveNarrative`, `UpdateNarrative`, `AddPlanItem`, `RemovePlanItem`, `UpdatePlanItem`
+- Convenience methods on `*core.Document` for common operations (e.g. `AddTodoItem`, `UpdateTodoItemStatus`, `AddPlanItem`, `AddNarrative`)
 
 2) **Validated mutations via `updater.Updater`**
 - `updater.NewUpdater(doc)` binds an updater to a document and validates after changes.
@@ -347,7 +347,7 @@ import (
 )
 
 func TestRoundTrip_JSON(t *testing.T) {
-    original := builder.NewTodoList("0.2").
+    original := builder.NewTodoList("0.4").
         AddPendingItem("Task 1").
         Build()
 
@@ -362,7 +362,7 @@ func TestRoundTrip_JSON(t *testing.T) {
 }
 
 func TestRoundTrip_TRON(t *testing.T) {
-    original := builder.NewTodoList("0.2").
+    original := builder.NewTodoList("0.4").
         AddPendingItem("Task 1").
         Build()
 
@@ -377,7 +377,7 @@ func TestRoundTrip_TRON(t *testing.T) {
 }
 
 func TestConversion_JSONToTRON(t *testing.T) {
-    original := builder.NewTodoList("0.2").
+    original := builder.NewTodoList("0.4").
         AddPendingItem("Task 1").
         Build()
 

@@ -72,19 +72,19 @@ func main() {
 	}
 	fmt.Printf("   Updated narrative 'overview': %s\n", plan.Narratives["overview"].Content)
 
-	// Add phases
-	plan.AddPhase(core.Phase{Title: "Phase 1", Status: core.PhaseStatusPending})
-	plan.AddPhase(core.Phase{Title: "Phase 2", Status: core.PhaseStatusPending})
-	fmt.Printf("   Added 2 phases, total: %d\n", len(plan.Phases))
+	// Add plan items
+	plan.AddPlanItem(core.PlanItem{Title: "Phase 1", Status: core.PlanItemStatusPending})
+	plan.AddPlanItem(core.PlanItem{Title: "Phase 2", Status: core.PlanItemStatusPending})
+	fmt.Printf("   Added 2 plan items, total: %d\n", len(plan.Items))
 
-	// Update phase
-	err = plan.UpdatePhase(0, func(p *core.Phase) {
-		p.Status = core.PhaseStatusInProgress
+	// Update plan item
+	err = plan.UpdatePlanItem(0, func(p *core.PlanItem) {
+		p.Status = core.PlanItemStatusInProgress
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("   Updated phase 0: %s (%s)\n\n", plan.Phases[0].Title, plan.Phases[0].Status)
+	fmt.Printf("   Updated plan item 0: %s (%s)\n\n", plan.Items[0].Title, plan.Items[0].Status)
 
 	// Validated mutations with Updater
 	fmt.Println("3. Validated mutations with Updater:")

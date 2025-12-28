@@ -18,7 +18,7 @@ func main() {
 
 	// Example 1: Build a TodoList
 	fmt.Println("Example 1: Building a TodoList")
-	todoDoc := builder.NewTodoList("0.2").
+	todoDoc := builder.NewTodoList("0.4").
 		WithAuthor("agent-alpha").
 		AddPendingItem("Implement authentication").
 		AddPendingItem("Write API documentation").
@@ -45,14 +45,14 @@ func main() {
 
 	// Example 2: Build a Plan
 	fmt.Println("Example 2: Building a Plan")
-	planDoc := builder.NewPlan("Add user authentication", "0.2").
+	planDoc := builder.NewPlan("Add user authentication", "0.4").
 		WithAuthor("team-lead").
 		WithStatus(core.PlanStatusDraft).
 		WithProposal("Proposed Changes", "Implement JWT-based authentication with refresh tokens").
 		WithProblem("Problem Statement", "Current system lacks secure authentication").
-		AddPendingPhase("Database setup").
-		AddInProgressPhase("JWT implementation").
-		AddPendingPhase("OAuth integration").
+		AddPendingItem("Database setup").
+		AddInProgressItem("JWT implementation").
+		AddPendingItem("OAuth integration").
 		Build()
 
 	planJSON, err := convert.ToJSONIndent(planDoc, "", "  ")

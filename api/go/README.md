@@ -59,8 +59,8 @@ planDoc := builder.NewPlan("Add user authentication", "0.2").
         "Implement JWT-based authentication with refresh tokens").
     WithProblem("Problem Statement", 
         "Current system lacks secure authentication").
-    AddPendingPhase("Database setup").
-    AddInProgressPhase("JWT implementation").
+    AddPendingPlanItem("Database setup").
+    AddInProgressPlanItem("JWT implementation").
     Build()
 ```
 
@@ -127,9 +127,9 @@ Collection of actionable work items for short-term memory.
 Single actionable task with title and status (`pending`, `inProgress`, `completed`, `blocked`, `cancelled`).
 
 ### Plan
-Structured design document for medium-term memory with narratives and phases.
+Structured design document for medium-term memory with narratives and plan items.
 
-### Phase
+### PlanItem
 Stage of work within a plan.
 
 ### Narrative
@@ -156,8 +156,8 @@ builder.NewPlan(title, version string) *PlanBuilder
   .WithProposal(title, content string)
   .WithProblem(title, content string)
   .WithContext(title, content string)
-  .AddPhase(title string, status core.PhaseStatus)
-  .AddPendingPhase(title string)
+  .AddPlanItem(title string, status core.PlanItemStatus)
+  .AddPendingPlanItem(title string)
   .Build() *core.Document
 ```
 
@@ -224,9 +224,9 @@ todoList.FindItem(predicate func(*TodoItem) bool) *TodoItem
 plan.AddNarrative(key string, narrative Narrative)
 plan.RemoveNarrative(key string)
 plan.UpdateNarrative(key string, updates func(*Narrative)) error
-plan.AddPhase(phase Phase)
-plan.RemovePhase(index int) error
-plan.UpdatePhase(index int, updates func(*Phase)) error
+plan.AddPlanItem(item PlanItem)
+plan.RemovePlanItem(index int) error
+plan.UpdatePlanItem(index int, updates func(*PlanItem)) error
 ```
 
 #### 2. Validated Mutations (Updater)

@@ -182,6 +182,7 @@ export interface Plan {
   title: string;
   status: PlanStatus;
   narratives: Record<string, Narrative>;
+  items?: PlanItem[];
 }
 
 /**
@@ -200,7 +201,7 @@ export type PlanStatus =
  */
 export interface PlanItem {
   title: string;
-  status: PhaseStatus;
+  status: PlanItemStatus;
 }
 
 /**

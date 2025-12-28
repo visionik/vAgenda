@@ -185,18 +185,18 @@ vcontext_update_plan({
 })
 
 // Add a PlanItem to a Plan
-vcontext_add_phase({
+vcontext_add_plan_item({
   planId: string,
   item: PlanItem,
   position?: number                # Insert at position, defaults to end
 })
 
 // Update a PlanItem
-vcontext_update_phase({
+vcontext_update_plan_item({
   planId: string,
-  phaseId: string,
+  itemId: string,
   title?: string,
-  status?: PhaseStatus
+  status?: PlanItemStatus
 })
 
 // Add learning to playbook

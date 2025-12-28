@@ -53,19 +53,19 @@ func TestPlanStatus_IsValid(t *testing.T) {
 	}
 }
 
-func TestPhaseStatus_IsValid(t *testing.T) {
+func TestPlanItemStatus_IsValid(t *testing.T) {
 	tests := []struct {
 		name   string
-		status PhaseStatus
+		status PlanItemStatus
 		want   bool
 	}{
-		{"pending is valid", PhaseStatusPending, true},
-		{"inProgress is valid", PhaseStatusInProgress, true},
-		{"completed is valid", PhaseStatusCompleted, true},
-		{"blocked is valid", PhaseStatusBlocked, true},
-		{"cancelled is valid", PhaseStatusCancelled, true},
-		{"empty string is invalid", PhaseStatus(""), false},
-		{"random string is invalid", PhaseStatus("invalid"), false},
+		{"pending is valid", PlanItemStatusPending, true},
+		{"inProgress is valid", PlanItemStatusInProgress, true},
+		{"completed is valid", PlanItemStatusCompleted, true},
+		{"blocked is valid", PlanItemStatusBlocked, true},
+		{"cancelled is valid", PlanItemStatusCancelled, true},
+		{"empty string is invalid", PlanItemStatus(""), false},
+		{"random string is invalid", PlanItemStatus("invalid"), false},
 	}
 
 	for _, tt := range tests {

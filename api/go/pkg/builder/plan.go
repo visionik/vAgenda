@@ -87,29 +87,29 @@ func (b *PlanBuilder) WithTesting(title, content string) *PlanBuilder {
 	return b.WithNarrative("testing", title, content)
 }
 
-// AddPhase adds a phase to the plan.
-func (b *PlanBuilder) AddPhase(title string, status core.PhaseStatus) *PlanBuilder {
-	phase := core.Phase{
+// AddPlanItem adds a plan item to the plan.
+func (b *PlanBuilder) AddPlanItem(title string, status core.PlanItemStatus) *PlanBuilder {
+	item := core.PlanItem{
 		Title:  title,
 		Status: status,
 	}
-	b.doc.Plan.Phases = append(b.doc.Plan.Phases, phase)
+	b.doc.Plan.Items = append(b.doc.Plan.Items, item)
 	return b
 }
 
-// AddPendingPhase adds a pending phase to the plan.
-func (b *PlanBuilder) AddPendingPhase(title string) *PlanBuilder {
-	return b.AddPhase(title, core.PhaseStatusPending)
+// AddPendingItem adds a pending plan item to the plan.
+func (b *PlanBuilder) AddPendingItem(title string) *PlanBuilder {
+	return b.AddPlanItem(title, core.PlanItemStatusPending)
 }
 
-// AddInProgressPhase adds an in-progress phase to the plan.
-func (b *PlanBuilder) AddInProgressPhase(title string) *PlanBuilder {
-	return b.AddPhase(title, core.PhaseStatusInProgress)
+// AddInProgressItem adds an in-progress plan item to the plan.
+func (b *PlanBuilder) AddInProgressItem(title string) *PlanBuilder {
+	return b.AddPlanItem(title, core.PlanItemStatusInProgress)
 }
 
-// AddCompletedPhase adds a completed phase to the plan.
-func (b *PlanBuilder) AddCompletedPhase(title string) *PlanBuilder {
-	return b.AddPhase(title, core.PhaseStatusCompleted)
+// AddCompletedItem adds a completed plan item to the plan.
+func (b *PlanBuilder) AddCompletedItem(title string) *PlanBuilder {
+	return b.AddPlanItem(title, core.PlanItemStatusCompleted)
 }
 
 // Build returns the constructed document.

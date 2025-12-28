@@ -153,9 +153,9 @@ func TestUpdater_PlanPhaseMutationsViaTransaction(t *testing.T) {
 			Title:      "Test Plan",
 			Status:     core.PlanStatusDraft,
 			Narratives: map[string]core.Narrative{"proposal": {Title: "Proposal", Content: "Content"}},
-			Phases: []core.Phase{
-				{Title: "Phase 1", Status: core.PhaseStatusPending},
-				{Title: "Phase 2", Status: core.PhaseStatusPending},
+			Items: []core.PlanItem{
+				{Title: "Phase 1", Status: core.PlanItemStatusPending},
+				{Title: "Phase 2", Status: core.PlanItemStatusPending},
 			},
 		},
 	}
@@ -164,25 +164,25 @@ func TestUpdater_PlanPhaseMutationsViaTransaction(t *testing.T) {
 
 	// Add phase and validate
 	err := u.Transaction(func(u *Updater) error {
-		doc.Plan.AddPhase(core.Phase{Title: "Phase 3", Status: core.PhaseStatusPending})
+		doc.Plan.AddPlanItem(core.PlanItem{Title: "Phase 3", Status: core.PlanItemStatusPending})
 		return nil
 	})
 	require.NoError(t, err)
-	assert.Len(t, doc.Plan.Phases, 3)
+	assert.Len(t, doc.Plan.Items, 3)
 
 	// Update phase and validate
 	err = u.Transaction(func(u *Updater) error {
-		return doc.Plan.UpdatePhase(0, func(p *core.Phase) {
-			p.Status = core.PhaseStatusCompleted
+		return doc.Plan.UpdatePlanItem(0, func(p *core.PlanItem) {
+			p.Status = core.PlanItemStatusCompleted
 		})
 	})
 	require.NoError(t, err)
-	assert.Equal(t, core.PhaseStatusCompleted, doc.Plan.Phases[0].Status)
+	assert.Equal(t, core.PlanItemStatusCompleted, doc.Plan.Items[0].Status)
 
 	// Remove phase and validate
 	err = u.Transaction(func(u *Updater) error {
-		return doc.Plan.RemovePhase(1)
+		return doc.Plan.RemovePlanItem(1)
 	})
 	require.NoError(t, err)
-	assert.Len(t, doc.Plan.Phases, 2)
+	assert.Len(t, doc.Plan.Items, 2)
 }

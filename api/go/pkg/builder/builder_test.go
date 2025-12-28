@@ -81,9 +81,9 @@ func TestPlanBuilder(t *testing.T) {
 			WithProposal("Proposal", "Use JWT").
 			WithProblem("Problem", "No auth").
 			WithContext("Context", "Current state").
-			AddPendingPhase("Phase 1").
-			AddInProgressPhase("Phase 2").
-			AddCompletedPhase("Phase 3").
+			AddPendingItem("Phase 1").
+			AddInProgressItem("Phase 2").
+			AddCompletedItem("Phase 3").
 			Build()
 
 		assert.Equal(t, "team-lead", doc.Info.Author)
@@ -95,10 +95,10 @@ func TestPlanBuilder(t *testing.T) {
 		assert.Equal(t, "No auth", doc.Plan.Narratives["problem"].Content)
 		assert.Equal(t, "Current state", doc.Plan.Narratives["context"].Content)
 
-		assert.Len(t, doc.Plan.Phases, 3)
-		assert.Equal(t, core.PhaseStatusPending, doc.Plan.Phases[0].Status)
-		assert.Equal(t, core.PhaseStatusInProgress, doc.Plan.Phases[1].Status)
-		assert.Equal(t, core.PhaseStatusCompleted, doc.Plan.Phases[2].Status)
+		assert.Len(t, doc.Plan.Items, 3)
+		assert.Equal(t, core.PlanItemStatusPending, doc.Plan.Items[0].Status)
+		assert.Equal(t, core.PlanItemStatusInProgress, doc.Plan.Items[1].Status)
+		assert.Equal(t, core.PlanItemStatusCompleted, doc.Plan.Items[2].Status)
 	})
 
 	t.Run("supports all narrative types", func(t *testing.T) {
@@ -120,12 +120,12 @@ func TestPlanBuilder(t *testing.T) {
 		assert.Contains(t, doc.Plan.Narratives, "testing")
 	})
 
-	t.Run("supports AddPhase with custom status", func(t *testing.T) {
+	t.Run("supports AddPlanItem with custom status", func(t *testing.T) {
 		doc := NewPlan("Plan", "0.2").
-			AddPhase("Blocked Phase", core.PhaseStatusBlocked).
+			AddPlanItem("Blocked Phase", core.PlanItemStatusBlocked).
 			Build()
 
-		assert.Len(t, doc.Plan.Phases, 1)
-		assert.Equal(t, core.PhaseStatusBlocked, doc.Plan.Phases[0].Status)
+		assert.Len(t, doc.Plan.Items, 1)
+		assert.Equal(t, core.PlanItemStatusBlocked, doc.Plan.Items[0].Status)
 	})
 }
