@@ -382,7 +382,7 @@ Plan {
 }
 ```
 
-**Note**: Plan narratives use bare strings since the key (proposal, hypothesis, etc.) provides semantic context. Item-level narratives (TodoItem, PlanItem, etc.) use Narrative objects with title+content since they lack this structural context.
+**Note**: Plan narratives use bare strings since the key (proposal, hypothesis, etc.) provides semantic context. Item-level narratives (TodoItem, PlanItem, TodoList, Playbook) are arrays of Narrative objects, allowing multiple narratives per item (e.g., both Background and Problem).
 
 ### PlanItem (Core)
 
@@ -440,7 +440,7 @@ These titles provide a consistent vocabulary across all vContext entities. Tools
 ```javascript
 Playbook {
   title: string           # Playbook title
-  narrative?: Narrative   # Optional description
+  narrative?: Narrative[] # Optional descriptions
   items: PlaybookItem[]   # Array of playbook entries
 }
 ```
@@ -558,7 +558,7 @@ class Narrative: title, content
 vContextInfo: vContextInfo("0.4")
 playbook: Playbook(
   "Backend Development Best Practices",
-  Narrative("Background", "Accumulated lessons learned from backend development"),
+  [Narrative("Background", "Accumulated lessons learned from backend development")],
   [
     PlaybookItem(
       "Test database migrations in staging first",
@@ -582,10 +582,12 @@ playbook: Playbook(
   },
   "playbook": {
     "title": "Backend Development Best Practices",
-    "narrative": {
-      "title": "Background",
-      "content": "Accumulated lessons learned from backend development"
-    },
+    "narrative": [
+      {
+        "title": "Background",
+        "content": "Accumulated lessons learned from backend development"
+      }
+    ],
     "items": [
       {
         "title": "Test database migrations in staging first",
@@ -670,7 +672,7 @@ todoList: TodoList(
   "todo-inc-2042",
   "f7d2a4c6-1e3f-4d62-9c9a-3a2e8f4b1f10",
   "INC-2042: Payment webhook latency regression",
-  Narrative("Overview", "Follow-ups after incident. Goal: prevent recurrence and improve observability."),
+  [Narrative("Overview", "Follow-ups after incident. Goal: prevent recurrence and improve observability.")],
   ["incident", "payments", "webhooks", "on-call"],
   12,
   Agent("human-jt", "human", "JT", "visionik@pobox.com"),
@@ -690,7 +692,7 @@ todoList: TodoList(
       "8c0d8b2f-2d08-4e4a-a34f-6a21f8f8a0b1",
       "Add p95/p99 alert for /webhooks/process",
       "inProgress",
-      Narrative("Background", "Alert on sustained p95>2s for 10m. Include saturation + queue depth as signals."),
+      [Narrative("Background", "Alert on sustained p95>2s for 10m. Include saturation + queue depth as signals.")],
       "critical",
       ["observability", "alerts"],
       "2025-12-28T06:55:00Z",
@@ -717,7 +719,7 @@ todoList: TodoList(
       "b112f9e9-1c84-4b8b-9893-6a0b2a1a40f7",
       "Run rollback drill for payment-webhooks",
       "pending",
-      Narrative("Background", "Practice rollback procedure in staging; capture time-to-recover and gaps."),
+      [Narrative("Background", "Practice rollback procedure in staging; capture time-to-recover and gaps.")],
       "high",
       ["runbook", "resilience"],
       "2025-12-28T07:33:00Z",
@@ -741,7 +743,7 @@ todoList: TodoList(
       "61c0c8c1-1db5-4e4e-b5da-1b7cbb1b2c22",
       "Weekly: review webhook SLA + alert thresholds",
       "pending",
-      Narrative("Background", "Adjust for seasonal traffic. Ensure alert noise is acceptable."),
+      [Narrative("Background", "Adjust for seasonal traffic. Ensure alert noise is acceptable.")],
       "medium",
       ["recurring", "slo"],
       "2025-12-28T07:34:00Z",
@@ -852,10 +854,12 @@ todoList: TodoList(
         "uid": "8c0d8b2f-2d08-4e4a-a34f-6a21f8f8a0b1",
         "title": "Add p95/p99 alert for /webhooks/process",
         "status": "inProgress",
-        "narrative": {
-          "title": "Background",
-          "content": "Alert on sustained p95>2s for 10m. Include saturation + queue depth as signals."
-        },
+        "narrative": [
+          {
+            "title": "Background",
+            "content": "Alert on sustained p95>2s for 10m. Include saturation + queue depth as signals."
+          }
+        ],
         "priority": "critical",
         "tags": ["observability", "alerts"],
         "created": "2025-12-28T06:55:00Z",
@@ -886,10 +890,12 @@ todoList: TodoList(
         "uid": "b112f9e9-1c84-4b8b-9893-6a0b2a1a40f7",
         "title": "Run rollback drill for payment-webhooks",
         "status": "pending",
-        "narrative": {
-          "title": "Background",
-          "content": "Practice rollback procedure in staging; capture time-to-recover and gaps."
-        },
+        "narrative": [
+          {
+            "title": "Background",
+            "content": "Practice rollback procedure in staging; capture time-to-recover and gaps."
+          }
+        ],
         "priority": "high",
         "tags": ["runbook", "resilience"],
         "created": "2025-12-28T07:33:00Z",
@@ -909,10 +915,12 @@ todoList: TodoList(
         "uid": "61c0c8c1-1db5-4e4e-b5da-1b7cbb1b2c22",
         "title": "Weekly: review webhook SLA + alert thresholds",
         "status": "pending",
-        "narrative": {
-          "title": "Background",
-          "content": "Adjust for seasonal traffic. Ensure alert noise is acceptable."
-        },
+        "narrative": [
+          {
+            "title": "Background",
+            "content": "Adjust for seasonal traffic. Ensure alert noise is acceptable."
+          }
+        ],
         "priority": "medium",
         "tags": ["recurring", "slo"],
         "created": "2025-12-28T07:34:00Z",
@@ -1006,7 +1014,7 @@ plan: Plan(
       "p1-uid",
       "Diagnose and fix root cause",
       "inProgress",
-      Narrative("Background", "Remove N+1 queries; isolate reconciliation job impact."),
+      [Narrative("Background", "Remove N+1 queries; isolate reconciliation job impact.")],
       ["root-cause"],
       [],
       "2025-12-27T18:30:00Z",
@@ -1025,7 +1033,7 @@ plan: Plan(
       "p2-uid",
       "Observability + guardrails",
       "pending",
-      Narrative("Background", "Dashboards, alerts, SLOs, and bounded autoscaling."),
+      [Narrative("Background", "Dashboards, alerts, SLOs, and bounded autoscaling.")],
       null,
       ["p1"],
       null,
@@ -1159,10 +1167,12 @@ plan: Plan(
         "uid": "p1-uid",
         "title": "Diagnose and fix root cause",
         "status": "inProgress",
-        "narrative": {
-          "title": "Background",
-          "content": "Remove N+1 queries; isolate reconciliation job impact."
-        },
+        "narrative": [
+          {
+            "title": "Background",
+            "content": "Remove N+1 queries; isolate reconciliation job impact."
+          }
+        ],
         "tags": ["root-cause"],
         "dependencies": [],
         "startDate": "2025-12-27T18:30:00Z",
@@ -1199,10 +1209,12 @@ plan: Plan(
         "uid": "p2-uid",
         "title": "Observability + guardrails",
         "status": "pending",
-        "narrative": {
-          "title": "Background",
-          "content": "Dashboards, alerts, SLOs, and bounded autoscaling."
-        },
+        "narrative": [
+          {
+            "title": "Background",
+            "content": "Dashboards, alerts, SLOs, and bounded autoscaling."
+          }
+        ],
         "dependencies": ["p1"],
         "classification": "private",
         "participants": [
@@ -1214,10 +1226,12 @@ plan: Plan(
         "uid": "p3-uid",
         "title": "Rollout + rollback drill",
         "status": "pending",
-        "narrative": {
-          "title": "Background",
-          "content": "Canary rollout, validate rollback, and document runbook."
-        },
+        "narrative": [
+          {
+            "title": "Background",
+            "content": "Canary rollout, validate rollback, and document runbook."
+          }
+        ],
         "dependencies": ["p1", "p2"],
         "classification": "confidential",
         "participants": [
