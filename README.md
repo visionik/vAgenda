@@ -432,30 +432,30 @@ Playbook {
 
 ```javascript
 PlaybookItem {
-  eventId: string          # Unique id for this event
-  targetId: string         # Stable id for the logical entry being evolved
-  operation: enum          # "initial" | "append" | "update" | "deprecate"
-  prevEventId?: string     # Prior eventId for this targetId (required for update/deprecate)
+  eventId: string          # Unique identifier for this event (append-only log record)
+  targetId: string         # Stable identifier for the logical entry being evolved across events
+  operation: enum          # "initial" | "append" | "update" | "deprecate" (how this event changes the target entry)
+  prevEventId?: string     # Previous eventId for this targetId (required for update/deprecate to form a chain)
   kind?: enum              # "strategy" | "learning" | "rule" | "warning" | "note" (required for initial/append)
 
-  title?: string           # Optional short label
-  narrative?: object       # Narrative map (Title Case keys -> markdown strings)
+  title?: string           # Optional short label for quick scanning / UI display
+  narrative?: object       # Narrative map: {Title Case key: markdown string} describing the entry or the change
 
-  tags?: string[]
-  evidence?: string[]
-  confidence?: number      # 0.0–1.0
-  delta?: object           # Merge-safe counters (e.g., helpfulCount/harmfulCount)
-  feedbackType?: enum
+  tags?: string[]          # Optional tags for categorization and search
+  evidence?: string[]      # Optional supporting references/IDs/links (e.g., incident IDs, PRs, docs)
+  confidence?: number      # Optional confidence score in [0.0, 1.0]
+  delta?: object           # Optional merge-safe counters for feedback aggregation (e.g., helpfulCount/harmfulCount)
+  feedbackType?: enum      # Optional source/type of feedback (e.g., humanReview, executionOutcome)
 
-  status?: enum            # "active" | "deprecated" | "quarantined"
-  deprecatedReason?: string
-  supersedes?: string[]
-  supersededBy?: string
-  duplicateOf?: string
+  status?: enum            # Optional lifecycle state: "active" | "deprecated" | "quarantined"
+  deprecatedReason?: string# Optional explanation when status is "deprecated" (why it should no longer be used)
+  supersedes?: string[]    # Optional list of targetIds that this entry replaces
+  supersededBy?: string    # Optional targetId that replaces this entry
+  duplicateOf?: string     # Optional targetId if this entry is a duplicate of another
 
-  createdAt: datetime      # When this event was created
-  reason?: string
-  metadata?: object
+  createdAt: datetime      # When this event occurred (timestamp for ordering/audit)
+  reason?: string          # Optional human-readable rationale for this specific event
+  metadata?: object        # Optional extension/extra fields; consumers must ignore unknown keys
 }
 ```
 
