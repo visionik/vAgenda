@@ -2171,6 +2171,10 @@ This spec is intentionally iterative. The following open questions are candidate
    - Alternative: standardize on UTC timestamps only and let agents/apps display in local time when needed.
    - Counterpoint: explicit timezone can represent user intent for display/scheduling (especially for due dates and reminders).
 
+6. **Would `progressing` be a better status name than `inProgress`?**
+   - Potential benefit: shorter and more natural language.
+   - Potential cost: breaking change across all documents/tools and less familiar than `inProgress`.
+
 ---
 
 # Appendix C: License
