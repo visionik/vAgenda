@@ -99,9 +99,11 @@ This spec includes JSON Schema files intended for validation and tooling:
 ## Design Philosophy
 
 vContext uses a **modular, layered architecture**:
-1. **Core (MVA)**: Minimum Viable Agenda - essential fields only
+1. **Core (MVA)**: Minimum Viable Account - essential fields only
 2. **Extensions**: Optional feature modules that add capabilities
 3. **Compatibility**: Extensions can be mixed and matched
+
+In this context, "account" means a written or stored record or description of events, experiences, or facts.
 
 This prevents complexity overload while supporting advanced use cases.
 
@@ -215,7 +217,7 @@ vContext serves as the canonical storage format, while Markdown can be generated
 
 ---
 
-# Part 1: Core (Minimum Viable Agenda)
+# Part 1: Core (Minimum Viable Account)
 
 ## Design Principles
 
