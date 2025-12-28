@@ -430,7 +430,7 @@ Playbook {
 
 **Purpose**: A single append-only event that creates, refines, or deprecates a logical playbook entry.
 
-Each PlaybookItem is an immutable event in the log. Multiple events can refer to the same `targetId`, which acts like the stable “thread id” for one logical playbook entry over time. When a tool wants to change an entry, it appends a new event with the same `targetId` and sets `prevEventId` to the prior event it is extending—this forms a verifiable chain (and enables conflict detection if two updates point at the same predecessor). `eventId` uniquely identifies the event itself; `targetId` identifies the evolving entry.
+Each PlaybookItem is an immutable event in the log. Events with the same `targetId` form a single logical “thread” (one playbook entry evolving over time), where each event captures a state change or refinement. When a tool updates or deprecates an entry, it appends a new event with the same `targetId` and sets `prevEventId` to the specific prior event it is extending—creating a verifiable chain and enabling conflict detection if two updates fork from the same predecessor. This model avoids rewriting history, supports auditing and concurrent tools, and lets consumers reconstruct “latest state” per `targetId` by following the thread. `eventId` uniquely identifies the event itself; `targetId` identifies the evolving entry.
 
 **Required fields (by operation)**:
 
