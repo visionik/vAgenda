@@ -2162,6 +2162,10 @@ This spec is intentionally iterative. The following open questions are candidate
    - Today: `uris` can point to anything (external URLs, files, other vAgenda documents), while `references` are vAgenda-only links.
    - Alternative: remove `references` entirely and rely on `uris` + a constrained `type` set for vAgenda document linking.
 
+2. **Can we combine `changeLog` and Playbook events into one concept?**
+   - Today: `changeLog` records document edits (create/update/fork/merge), while Playbooks use append-only PlaybookItem events to evolve long-term guidance.
+   - Alternative: unify into a single append-only event log model with different event kinds/scopes (document mutation vs knowledge evolution), reducing duplicated machinery.
+
 ---
 
 # Appendix C: License
