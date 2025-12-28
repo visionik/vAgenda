@@ -412,7 +412,7 @@ These titles provide a consistent vocabulary across all vContext entities. Tools
 
 ### Playbook (Core)
 
-**Purpose**: A collection of accumulated knowledge for **long-term memory**. Playbooks are designed to support *evolving contexts* via structured, incremental updates (generation → reflection → curation) and to avoid context collapse from monolithic rewrites.
+**Purpose**: A collection of accumulated knowledge for **long-term memory**. Playbooks are designed to support *evolving contexts* via structured, incremental updates (generation → reflection → curation) rather than periodically rewriting a single “best version.” This helps preserve provenance (what changed, when, and why), reduces summary drift, and mitigates context collapse that can happen when agents repeatedly compress or overwrite guidance. The append-only design is also aligned with modern agentic memory research such as *Agentic Context Engineering (ACE)* (arXiv:2510.04618), where durable, iteratively-curated artifacts and feedback loops improve future behavior.
 
 vContext represents playbooks as an **append-only event log**: tools evolve guidance by appending new `PlaybookItem` events, optionally linking updates via `prevEventId`.
 
